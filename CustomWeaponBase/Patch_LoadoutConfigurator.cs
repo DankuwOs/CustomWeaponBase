@@ -7,7 +7,7 @@ using UnityEngine;
 public class Patch_LoadoutConfigurator
 {
     [HarmonyPostfix]
-    public static void Postfix(LoadoutConfigurator __instance)
+    public static void Postfix(LoadoutConfigurator __instance, bool useMidflightEquips)
     {
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
         Traverse traverse = Traverse.Create(__instance);

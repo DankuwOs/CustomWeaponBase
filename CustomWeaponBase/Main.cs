@@ -53,15 +53,15 @@ namespace CustomWeaponBase
 
             if (request.assetBundle != null)
             {
-                AssetBundleRequest requestjson = request.assetBundle.LoadAssetAsync("manifest.json");
-                yield return requestjson;
-                if (requestjson.asset == null)
+                AssetBundleRequest requestJson = request.assetBundle.LoadAssetAsync("manifest.json");
+                yield return requestJson;
+                if (requestJson.asset == null)
                 {
                     Debug.LogError("Couldn't find manifest.json in " + info.Name);
                     yield break;
                 }
 
-                TextAsset manifest = requestjson.asset as TextAsset;
+                TextAsset manifest = requestJson.asset as TextAsset;
                 JObject jManifest = JsonConvert.DeserializeObject<JObject>(manifest.text);
 
                 #region Legacy
@@ -101,6 +101,18 @@ namespace CustomWeaponBase
                 else
                 {
                     Debug.Log($"Dependency empty for {info.FullName}");
+                }
+
+                string devDependency = (string) jManifest["DevDependency"];
+
+                if (File.Exists(devDependency))
+                {
+                    Debug.Log($"Trying to load dev dependency @ {devDependency}");
+                    Assembly.LoadFile(devDependency);
+                }
+                else if (!string.IsNullOrEmpty(devDependency))
+                {
+                    Debug.Log($"Couldn't find dev dependency @ {devDependency}");
                 }
 
 
