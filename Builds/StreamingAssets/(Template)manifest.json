@@ -1,0 +1,10 @@
+{
+	"Dependency" : "DDArmory.dll", (whole line can be removed)
+	"Weapons" : {
+		"Prefab_Name"     : "94, 26",
+		"Danku_Gun_Thing" : "45"
+	},
+	"Missiles (Can be removed, not required.)" : {
+		"Missile_Prefab" : "Resource/Path" 
+	}
+}
