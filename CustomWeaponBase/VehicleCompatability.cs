@@ -4,6 +4,7 @@ namespace CustomWeaponBase
 {
     public class VehicleCompatibility
     {
+        // This code is from Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
         public static bool CompareTo(VehicleCompat compatability, VTOLVehicles vehicle) // is this overengineered? yes. Do I care? Yes ;(
         {
             VehicleCompat bitMask = convert(vehicle);

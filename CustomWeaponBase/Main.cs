@@ -16,6 +16,8 @@ namespace CustomWeaponBase
 {
     public class Main : VTOLMOD
     {
+        // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
+
         private readonly string AH94 = "HPEquips/AH-94";
         private readonly string FA26 = "HPEquips/AFighter";
         private readonly string F45  = "HPEquips/F45A";

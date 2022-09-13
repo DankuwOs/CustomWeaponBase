@@ -9,6 +9,7 @@ public class Patch_LoadoutConfigurator
     [HarmonyPostfix]
     public static void Postfix(LoadoutConfigurator __instance)
     {
+        // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
         Traverse traverse = Traverse.Create(__instance);
         Dictionary<string, EqInfo> unlockedWeaponPrefabs = (Dictionary<string, EqInfo>)traverse.Field("unlockedWeaponPrefabs").GetValue();
         foreach (var weapon in Main.weapons)
