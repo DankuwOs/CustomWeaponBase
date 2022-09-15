@@ -41,12 +41,19 @@ namespace CustomWeaponBase
             foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
             {
                 Debug.Log("Found .nbda " + file.FullName);
-                StartCoroutine(LoadStreamedWeapons(file));
+                StartCoroutine(LoadStreamedWeapons(file, true));
             }
+            Debug.Log("Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
+            foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
+            {
+                Debug.Log("Found .nbda " + file.FullName);
+                StartCoroutine(LoadStreamedWeapons(file, false));
+            }
+            
             yield break;
         }
 
-        private IEnumerator LoadStreamedWeapons(FileInfo info)
+        private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNbda)
         {
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
             yield return request;
@@ -68,6 +75,11 @@ namespace CustomWeaponBase
 
                 if (jManifest["Weapons"] == null && jManifest["Missiles"] == null && jManifest["Dependency"] == null)
                 {
+                    if (!isNbda)
+                    {
+                        throw new NullReferenceException($"{info.Name} NEEDS TO UPDATE THEIR GODDAMN MANIFEST!!! DO IT!! FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
+                    }
+                    
                     Debug.Log($"Loading legacy .nbda: {info.Name}");
 
                     Dictionary<string, string> jsonLines = jManifest.ToObject<Dictionary<string, string>>();
