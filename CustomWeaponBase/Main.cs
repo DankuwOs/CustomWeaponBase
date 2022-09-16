@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Harmony;
 using UnityEngine;
+using UnityEngine.Events;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
 using VTNetworking;
@@ -24,28 +26,50 @@ namespace CustomWeaponBase
         private readonly string AV42 = "HPEquips/VTOL";
 
         public static Dictionary<Tuple<string, GameObject>, VehicleCompat> weapons = new Dictionary<Tuple<string, GameObject>, VehicleCompat>();
+
+        public List<AssetBundle> AssetBundles;
         
+
+        public static bool allowWMDS = true;
+
+        public static Main instance;
+
         public override void ModLoaded()
         {
             HarmonyInstance instance = HarmonyInstance.Create("danku.cwb");
-            instance.PatchAll();
+            instance.PatchAll(Assembly.GetExecutingAssembly());
             
             base.ModLoaded();
-            StartCoroutine(LoadCustomCustomBundlesAsync());
+            StartCoroutine(LoadCustomCustomBundlesAsync(false));
+
+            GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
+            DontDestroyOnLoad(cwb);
+            Main.instance = this;
         }
 
-        private IEnumerator LoadCustomCustomBundlesAsync() // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
+        public void ReloadBundles()
         {
+            var cwbWeapons = FindObjectsOfType<CWB_Weapon>(true);
+            if (cwbWeapons.Length > 0)
+                DestroyObjects(cwbWeapons);
+            StartCoroutine(LoadCustomCustomBundlesAsync(true));
+        }
+
+        private IEnumerator LoadCustomCustomBundlesAsync(bool reload) // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
+        {
+
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
             Debug.Log("Searching " + Directory.GetCurrentDirectory() + " for .nbda custom weapons");
             foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
             {
+
                 Debug.Log("Found .nbda " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, true));
             }
             Debug.Log("Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
             foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
             {
+                
                 Debug.Log("Found .nbda " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, false));
             }
@@ -53,13 +77,24 @@ namespace CustomWeaponBase
             yield break;
         }
 
-        private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNbda)
+        private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNBDA)
         {
+            if (AssetBundles != null)
+            {
+                foreach (var assetBundle in AssetBundles)
+                {
+                    assetBundle.Unload(true);
+                }
+            }
+
+            AssetBundles = new List<AssetBundle>();
+            
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
             yield return request;
 
-            if (request.assetBundle != null)
+            if (request.assetBundle)
             {
+                AssetBundles.Add(request.assetBundle);
                 AssetBundleRequest requestJson = request.assetBundle.LoadAssetAsync("manifest.json");
                 yield return requestJson;
                 if (requestJson.asset == null)
@@ -75,7 +110,7 @@ namespace CustomWeaponBase
 
                 if (jManifest["Weapons"] == null && jManifest["Missiles"] == null && jManifest["Dependency"] == null)
                 {
-                    if (!isNbda)
+                    if (!isNBDA)
                     {
                         throw new NullReferenceException($"{info.Name} NEEDS TO UPDATE THEIR GODDAMN MANIFEST!!! DO IT!! FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
                     }
@@ -108,7 +143,7 @@ namespace CustomWeaponBase
                 if (File.Exists($"{info.DirectoryName}/{dependency}"))
                 {
                     Debug.Log($"Trying to load dependency {dependency}");
-                    Assembly.LoadFile($"{info.DirectoryName}/{dependency}");
+                    LoadAssembly($"{info.DirectoryName}/{dependency}");
                 }
                 else
                 {
@@ -120,7 +155,7 @@ namespace CustomWeaponBase
                 if (File.Exists(devDependency))
                 {
                     Debug.Log($"Trying to load dev dependency @ {devDependency}");
-                    Assembly.LoadFile(devDependency);
+                    LoadAssembly(devDependency);
                 }
                 else if (!string.IsNullOrEmpty(devDependency))
                 {
@@ -151,7 +186,7 @@ namespace CustomWeaponBase
                 if (jsonMissiles != null)
                     foreach (var missile in jsonMissiles)
                     {
-                        Debug.Log($"Trying to add missile {missile.Key}");
+                        Debug.Log($"Trying to add missile {missile.Key} to path {missile.Value}");
                         AssetBundleRequest requestMissile = request.assetBundle.LoadAssetAsync(missile.Key + ".prefab");
                         yield return requestMissile;
                         if (requestMissile == null)
@@ -177,6 +212,7 @@ namespace CustomWeaponBase
         public void RegisterWeapon(GameObject equip, string weaponName, string compatability)
         {
             equip.name = weaponName;
+            equip.AddComponent<CWB_Weapon>();
             DontDestroyOnLoad(equip);
             
             foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
@@ -266,10 +302,35 @@ namespace CustomWeaponBase
 
         public void RegisterMissile(GameObject missile, string resourcePath)
         {
+            missile.AddComponent<CWB_Weapon>();
             DontDestroyOnLoad(missile);
             VTResources.RegisterOverriddenResource(resourcePath, missile);
             VTNetworkManager.RegisterOverrideResource(resourcePath, missile);
             missile.SetActive(false);
+        }
+
+        public void LoadAssembly(string path)
+        {
+            var file = Assembly.LoadFile(path);
+            IEnumerable<Type> source =
+                from t in file.GetTypes()
+                where t.IsSubclassOf(typeof(VTOLMOD))
+                select t;
+            if (source != null && source.Count() == 1)
+            {
+                GameObject go = new GameObject("a mod :~)", source.First());
+                DontDestroyOnLoad(go);
+                go.GetComponent<VTOLMOD>().ModLoaded();
+            }
+        }
+
+        public void DestroyObjects(CWB_Weapon[] gameObjects)
+        {
+            foreach (var o in gameObjects)
+            {
+                Destroy(o.gameObject);
+                Debug.Log("CWB: Destroyed obj.");
+            }
         }
     }
 }

@@ -37,6 +37,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Facepunch.Steamworks.Win64">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
+    </Reference>
     <Reference Include="ModLoader">
       <HintPath>..\Dependencies\ModLoader.dll</HintPath>
     </Reference>
@@ -48,6 +51,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Unity.InputSystem">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Unity.InputSystem.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\Dependencies\UnityEngine.dll</HintPath>
     </Reference>
@@ -60,19 +66,41 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\Dependencies\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Custom Components\CombinedCannon.cs" />
+    <Compile Include="Custom Components\CWB Weapon.cs" />
+    <Compile Include="Custom Components\HeadTrackObject.cs" />
+    <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
+    <Compile Include="Custom Components\LiveryMesh.cs" />
+    <Compile Include="Custom Components\TextureHolder.cs" />
+    <Compile Include="Custom Components\WindingWeapon.cs" />
+    <Compile Include="Custom Components\WMD Weapon.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Patch_LoadoutConfigurator.cs" />
-    <Compile Include="Patch_NetInstantiate.cs" />
+    <Compile Include="Missile Debug\CustomWeaponBase.cs" />
+    <Compile Include="Patches\Patch_AircraftLiveryApplicator.cs" />
+    <Compile Include="Patches\Patch_HPEquipIRML.cs" />
+    <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
+    <Compile Include="Patches\Patch_MPLobbyData.cs" />
+    <Compile Include="Patches\Patch_NetInstantiate.cs" />
+    <Compile Include="Patches\Patch_PlayerVehicleSetup.cs" />
+    <Compile Include="Patches\Patch_VTMPScenarioSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VehicleCompatability.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"
+copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOLVR v1.4.13\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

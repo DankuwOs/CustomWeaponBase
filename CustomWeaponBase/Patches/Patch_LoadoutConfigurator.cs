@@ -19,6 +19,12 @@ public class Patch_LoadoutConfigurator
             if (VehicleCompatibility.CompareTo(weapon.Value, VTOLAPI.GetPlayersVehicleEnum()))
             {
                 GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
+                if (!Main.allowWMDS && weaponPrefab.GetComponent<WMD_Weapon>())
+                {
+                    weaponPrefab.SetActive(false);
+                    continue;
+                }
+
                 weaponPrefab.name = weapon.Key.Item1;
                 EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
                 weaponPrefab.SetActive(false);
