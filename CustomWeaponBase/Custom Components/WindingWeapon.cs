@@ -6,8 +6,6 @@ using UnityEngine.Events;
 
 public class WindingWeapon : MonoBehaviour
 {
-    public HPEquippable equip;
-    
     public AudioSource _source;
     
     [Range(0f, 5f)] public float pitchFactor;
@@ -84,18 +82,26 @@ public class WindingWeapon : MonoBehaviour
 
             if (_windUp >= windUpTime)
             {
-                _windUp = 0f;
-                _source.Stop();
-                _source.pitch = 0f;
-                _source.volume = 0f;
+                if (_source.isPlaying || _source.volume > 0)
+                {
+                    _source.Stop();
+                    _source.pitch = 0f;
+                    _source.volume = 0f;
+                }
+
+
                 UnityEvent onFired = this.onFired;
                 if (onFired != null)
                 {
                     onFired.Invoke();
                 }
+                
+
+                _windUp = 0f;
                 isCoroutine = false;
                 yield break;
             }
+
             _source.pitch = pitchCurve.Evaluate(_windUp / windUpTime) * pitchFactor;
             _source.volume = volumeCurve.Evaluate(_windUp / windUpTime) * volumeMultiplier;
             yield return null;

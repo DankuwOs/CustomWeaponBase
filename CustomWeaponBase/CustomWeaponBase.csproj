@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,9 +85,9 @@
     <Compile Include="Custom Components\LiveryMesh.cs" />
     <Compile Include="Custom Components\TextureHolder.cs" />
     <Compile Include="Custom Components\WindingWeapon.cs" />
-    <Compile Include="Custom Components\WMD Weapon.cs" />
+    <Compile Include="CWB Utils\FileLoader.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Missile Debug\CustomWeaponBase.cs" />
+    <Compile Include="CWB Utils\CustomWeaponBase.cs" />
     <Compile Include="Patches\Patch_AircraftLiveryApplicator.cs" />
     <Compile Include="Patches\Patch_HPEquipIRML.cs" />
     <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />

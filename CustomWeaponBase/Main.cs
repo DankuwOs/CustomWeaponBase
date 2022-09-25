@@ -4,12 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Harmony;
 using UnityEngine;
-using UnityEngine.Events;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
 using VTNetworking;
@@ -34,6 +30,8 @@ namespace CustomWeaponBase
 
         public static Main instance;
 
+        public static GameObject nodeObj;
+
         public override void ModLoaded()
         {
             HarmonyInstance instance = HarmonyInstance.Create("danku.cwb");
@@ -45,6 +43,8 @@ namespace CustomWeaponBase
             GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
             DontDestroyOnLoad(cwb);
             Main.instance = this;
+            
+            nodeObj = CWB_Utils.FileLoader.GetAssetBundleAsGameObject($"{ModFolder}/node.splooge", "NodeTemplate");
         }
 
         public void ReloadBundles()
@@ -212,7 +212,8 @@ namespace CustomWeaponBase
         public void RegisterWeapon(GameObject equip, string weaponName, string compatability)
         {
             equip.name = weaponName;
-            equip.AddComponent<CWB_Weapon>();
+            if(!equip.GetComponent<CWB_Weapon>())
+                equip.AddComponent<CWB_Weapon>();
             DontDestroyOnLoad(equip);
             
             foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
