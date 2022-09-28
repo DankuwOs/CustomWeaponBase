@@ -1,10 +1,8 @@
 {
-	"Dependency" : "DDArmory.dll", (whole line can be removed)
+	"Dependency"    : "DDArmory.dll", (whole line can be removed, points to dll in same folder as AB),
+	"DevDependency" : "D:\\Example\\YourFolder\\YourDll.dll" (Remove in release build, replace with Dependency. Only used for loading dlls outside AB folder),
 	"Weapons" : {
 		"Prefab_Name"     : "94, 26",
 		"Danku_Gun_Thing" : "45"
-	},
-	"Missiles" (Can be removed, not required.) : {
-		"Missile_Prefab" : "Resource/Path" 
 	}
 }

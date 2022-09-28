@@ -99,6 +99,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VehicleCompatability.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Builds\StreamingAssets\(Template)manifest.json">
+      <Link>(Template)manifest.json</Link>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"
