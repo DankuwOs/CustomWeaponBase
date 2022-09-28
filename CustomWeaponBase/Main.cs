@@ -181,24 +181,8 @@ namespace CustomWeaponBase
 
                         RegisterWeapon(requestWeaponAsset, weapon.Key, weapon.Value);
                     }
-
-                Dictionary<string, string> jsonMissiles = jManifest["Missiles"]?.ToObject<Dictionary<string, string>>();
-                if (jsonMissiles != null)
-                    foreach (var missile in jsonMissiles)
-                    {
-                        Debug.Log($"Trying to add missile {missile.Key} to path {missile.Value}");
-                        AssetBundleRequest requestMissile = request.assetBundle.LoadAssetAsync(missile.Key + ".prefab");
-                        yield return requestMissile;
-                        if (requestMissile == null)
-                        {
-                            Debug.Log($"Couldn't load missile {missile.Key}");
-                            continue;
-                        }
-
-                        GameObject requestMissileAsset = requestMissile.asset as GameObject;
-
-                        RegisterMissile(requestMissileAsset, missile.Value);
-                    }
+                
+                // Removed missiles from json, they didn't do anything anyway..
             }
             else
             {

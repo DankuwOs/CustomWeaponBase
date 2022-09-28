@@ -36,8 +36,6 @@ public class Patch_LoadoutConfigurator
                     continue;
                 }
 
-                
-                
                 var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
                 if (cwbWeapon)
                 {
@@ -61,58 +59,18 @@ public class Patch_LoadoutConfigurator
     [HarmonyPrefix]
     public static void Prefix(LoadoutConfigurator __instance)
     {
-        
-        foreach (var weapon in Main.weapons)
+        NewHardpoints = new List<int>();
+
+        int hpCount = 3;
+        Debug.Log($"Attempting to add {hpCount} hp's");
+        for (int i = 0; i < hpCount; i++)
         {
-            if (VehicleCompatibility.CompareTo(weapon.Value, VTOLAPI.GetPlayersVehicleEnum()))
-            {
-                GameObject weaponPrefab = weapon.Key.Item2;
-                if (!Main.allowWMDS && weaponPrefab.GetComponent<CWB_Weapon>().WMD)
-                {
-                    weaponPrefab.SetActive(false);
-                    continue;
-                }
-                var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
-                if (cwbWeapon)
-                {
-                    if (!Main.allowWMDS && cwbWeapon.WMD)
-                        continue;
-                    
-                    if (cwbWeapon.newHardpoints == "")
-                        continue;
-                    
-                    var hps = cwbWeapon.newHardpoints.Split(new char[]
-                    {
-                        ','
-                    }, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (var hp in hps)
-                    {
-                        int nodeCount = __instance.hpNodes.Length;
-                        var hpInt = int.Parse(hp);
-                        
-                        if (hpInt < nodeCount || NewHardpoints.Contains(hpInt))
-                            continue;
-
-                        if (hpInt > nodeCount)
-                        {
-                            Debug.Log($"[Hardpoint Warning] hpInt for {weaponPrefab.name} was 2 or more than array length.. please fix.");
-                            hpInt = nodeCount; // Any value 2 or more above current array length will be bad..
-                            
-                            var equippable = weaponPrefab.GetComponent<HPEquippable>();
-                            if (equippable)
-                                equippable.allowedHardpoints.Replace(hp, hpInt.ToString());
-                        }
-
-                        Debug.Log($"[Hardpoint] Trying to add new hardpoint {hpInt} to vehicle {__instance.wm.gameObject.name} for {weaponPrefab.name} with allowed hps {weaponPrefab.GetComponent<HPEquippable>().allowedHardpoints}");
-                        CreateHardpoint(hpInt, __instance);
-                    }
-                }
-            }
+            CreateHardpoint(__instance.hpNodes.Length + i, __instance);
         }
+        
     }
 
-    public static void CreateHardpoint(int idx, LoadoutConfigurator configurator)
+    private static void CreateHardpoint(int idx, LoadoutConfigurator configurator)
     {
         if (NewHardpoints.Contains(idx))
             return;
@@ -125,13 +83,6 @@ public class Patch_LoadoutConfigurator
         var tfList = configurator.wm.hardpointTransforms.ToList();
         tfList.Add(newTransform);
         configurator.wm.hardpointTransforms = tfList.ToArray();
-        
-        
-
-        /*if (!configurator.CanEquipIdx(idx))
-        {  
-            Debug.Log($"Cannot equip on idx: {idx}! Fix your shit!!");
-        }*/
 
         var hpObj = Object.Instantiate(Main.nodeObj, configurator.hpNodes[0].transform.parent);
         hpObj.name = $"HardpointInfo ({idx})";
@@ -149,11 +100,14 @@ public class Patch_LoadoutConfigurator
             else
                 hpObj.transform.localPosition = spPosition + new Vector3(0, -40 * NewHardpoints.Count, 0);
         }
+        
         hpObj.SetActive(true);
         NewHardpoints.Add(idx);
         
         var nodeList = configurator.hpNodes.ToList();
         nodeList.Add(hpObj.GetComponent<HPConfiguratorNode>());
         configurator.hpNodes = nodeList.ToArray();
+        
+        Debug.Log($"Added custom HP {idx}");
     }
 }
