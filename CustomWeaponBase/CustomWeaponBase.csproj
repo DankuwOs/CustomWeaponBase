@@ -78,8 +78,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Custom Components\BurstMissile.cs" />
     <Compile Include="Custom Components\CombinedCannon.cs" />
     <Compile Include="Custom Components\CWB Weapon.cs" />
+    <Compile Include="Custom Components\FLKMissile.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
