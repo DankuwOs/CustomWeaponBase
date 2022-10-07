@@ -38,7 +38,7 @@ public class FLKMissile : MonoBehaviour
 
     private IEnumerator FLKRoutinte()
     {
-        gun.actor = missile.actor;
+        
         
         if (fairings.Length > 0)
             foreach (var missileFairing in fairings)
@@ -51,6 +51,8 @@ public class FLKMissile : MonoBehaviour
         OnFire.Invoke();
         if (!gun)
             yield break;
+        
+        gun.actor = missile.actor;
         
         gun.SetFire(true);
 

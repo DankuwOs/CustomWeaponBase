@@ -25,31 +25,30 @@ public class Patch_LoadoutConfigurator
         Dictionary<string, EqInfo> unlockedWeaponPrefabs = (Dictionary<string, EqInfo>)traverse.Field("unlockedWeaponPrefabs").GetValue();
         foreach (var weapon in Main.weapons)
         {
-            Debug.Log($"Trying to add {weapon.Key.Item1} to configurator.");
+            Debug.Log($"[CWB]: Trying to add {weapon.Key.Item1} to configurator.");
             var currentVehicle = PilotSaveManager.currentVehicle;
-            if (VehicleCompatibility.CompareTo(weapon.Value, VTOLAPI.GetPlayersVehicleEnum()))
+            if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
+            
+            GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
+            if (!Main.allowWMDS && weaponPrefab.GetComponent<CWB_Weapon>().WMD)
             {
-                GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
-                if (!Main.allowWMDS && weaponPrefab.GetComponent<CWB_Weapon>().WMD)
-                {
-                    weaponPrefab.SetActive(false);
-                    continue;
-                }
-
-                var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
-                if (cwbWeapon)
-                {
-                    if (!Main.allowWMDS && cwbWeapon.WMD)
-                        continue;
-                }
-
-                weaponPrefab.name = weapon.Key.Item1;
-                EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
                 weaponPrefab.SetActive(false);
-
-                unlockedWeaponPrefabs.Add(weapon.Key.Item1, weaponInfo);
-                __instance.availableEquipStrings.Add(weapon.Key.Item1);
+                continue;
             }
+
+            var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
+            if (cwbWeapon)
+            {
+                if (!Main.allowWMDS && cwbWeapon.WMD)
+                    continue;
+            }
+
+            weaponPrefab.name = weapon.Key.Item1;
+            EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
+            weaponPrefab.SetActive(false);
+
+            unlockedWeaponPrefabs.Add(weapon.Key.Item1, weaponInfo);
+            __instance.availableEquipStrings.Add(weapon.Key.Item1);
         }
         
         traverse.Field("unlockedWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
@@ -62,7 +61,7 @@ public class Patch_LoadoutConfigurator
         NewHardpoints = new List<int>();
 
         int hpCount = 3;
-        Debug.Log($"Attempting to add {hpCount} hp's");
+        Debug.Log($"[CWB]: Attempting to add {hpCount} hp's");
         for (int i = 0; i < hpCount; i++)
         {
             CreateHardpoint(__instance.hpNodes.Length + i, __instance);
@@ -108,6 +107,6 @@ public class Patch_LoadoutConfigurator
         nodeList.Add(hpObj.GetComponent<HPConfiguratorNode>());
         configurator.hpNodes = nodeList.ToArray();
         
-        Debug.Log($"Added custom HP {idx}");
+        Debug.Log($"[CWB]: Added custom HP {idx}");
     }
 }

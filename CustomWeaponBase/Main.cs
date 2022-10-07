@@ -16,12 +16,9 @@ namespace CustomWeaponBase
     {
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
 
-        private readonly string AH94 = "HPEquips/AH-94";
-        private readonly string FA26 = "HPEquips/AFighter";
-        private readonly string F45  = "HPEquips/F45A";
-        private readonly string AV42 = "HPEquips/VTOL";
+        private readonly string CWBPath = "CustomWeaponBase";
 
-        public static Dictionary<Tuple<string, GameObject>, VehicleCompat> weapons = new Dictionary<Tuple<string, GameObject>, VehicleCompat>();
+        public static Dictionary<Tuple<string, GameObject>, string> weapons = new Dictionary<Tuple<string, GameObject>, string>();
 
         public List<AssetBundle> AssetBundles;
         
@@ -45,6 +42,11 @@ namespace CustomWeaponBase
             Main.instance = this;
             
             nodeObj = CWB_Utils.FileLoader.GetAssetBundleAsGameObject($"{ModFolder}/node.splooge", "NodeTemplate");
+            
+            VTOLAPI.SceneLoaded += delegate
+            {
+                CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
+            };
         }
 
         public void ReloadBundles()
@@ -59,18 +61,18 @@ namespace CustomWeaponBase
         {
 
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
-            Debug.Log("Searching " + Directory.GetCurrentDirectory() + " for .nbda custom weapons");
+            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda custom weapons");
             foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
             {
 
-                Debug.Log("Found .nbda " + file.FullName);
+                Debug.Log("[CWB]: Found .nbda " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, true));
             }
-            Debug.Log("Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
+            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
             foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
             {
                 
-                Debug.Log("Found .nbda " + file.FullName);
+                Debug.Log("[CWB]: Found .nbda " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, false));
             }
             
@@ -115,7 +117,7 @@ namespace CustomWeaponBase
                         throw new NullReferenceException($"{info.Name} NEEDS TO UPDATE THEIR GODDAMN MANIFEST!!! DO IT!! FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
                     }
                     
-                    Debug.Log($"Loading legacy .nbda: {info.Name}");
+                    Debug.Log($"[CWB]: Loading legacy .nbda: {info.Name}");
 
                     Dictionary<string, string> jsonLines = jManifest.ToObject<Dictionary<string, string>>();
                     foreach (var weaponName in jsonLines)
@@ -124,7 +126,7 @@ namespace CustomWeaponBase
                         yield return requestGun;
                         if (requestGun.asset == null)
                         {
-                            Debug.LogError("Couldn't load asset " + weaponName.Key);
+                            Debug.LogError("[CWB]: Couldn't load asset " + weaponName.Key);
                             continue;
                         }
 
@@ -142,24 +144,24 @@ namespace CustomWeaponBase
 
                 if (File.Exists($"{info.DirectoryName}/{dependency}"))
                 {
-                    Debug.Log($"Trying to load dependency {dependency}");
+                    Debug.Log($"[CWB]: Trying to load dependency {dependency}");
                     LoadAssembly($"{info.DirectoryName}/{dependency}");
                 }
                 else
                 {
-                    Debug.Log($"Dependency empty for {info.FullName}");
+                    Debug.Log($"[CWB]: Dependency empty for {info.FullName}");
                 }
 
                 string devDependency = (string) jManifest["DevDependency"];
 
                 if (File.Exists(devDependency))
                 {
-                    Debug.Log($"Trying to load dev dependency @ {devDependency}");
+                    Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
                     LoadAssembly(devDependency);
                 }
                 else if (!string.IsNullOrEmpty(devDependency))
                 {
-                    Debug.Log($"Couldn't find dev dependency @ {devDependency}");
+                    Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency}");
                 }
 
 
@@ -168,12 +170,11 @@ namespace CustomWeaponBase
                 if (jsonWeapons != null)
                     foreach (var weapon in jsonWeapons)
                     {
-                        Debug.Log($"Trying to add {weapon.Key}");
                         AssetBundleRequest requestWeapon = request.assetBundle.LoadAssetAsync(weapon.Key + ".prefab");
                         yield return requestWeapon;
                         if (requestWeapon == null)
                         {
-                            Debug.LogError($"Couldn't load asset {weapon.Key}");
+                            Debug.LogError($"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
                             continue;
                         }
 
@@ -186,7 +187,7 @@ namespace CustomWeaponBase
             }
             else
             {
-                Debug.Log("Couldn't load streamed bundle " + info.FullName);
+                Debug.Log("[CWB]: Couldn't load streamed bundle " + info.FullName);
             }
 
             yield break;
@@ -195,9 +196,17 @@ namespace CustomWeaponBase
 
         public void RegisterWeapon(GameObject equip, string weaponName, string compatability)
         {
+            Debug.Log($"[CWB]: Registering {weaponName}");
+            if (!equip)
+            {
+                Debug.Log($"[CWB]: {weaponName} is null!");
+                return;
+            }
+
             equip.name = weaponName;
             if(!equip.GetComponent<CWB_Weapon>())
                 equip.AddComponent<CWB_Weapon>();
+
             DontDestroyOnLoad(equip);
             
             foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
@@ -240,47 +249,26 @@ namespace CustomWeaponBase
                 }
             }
             
-            int mask = 0;
-            if (compatability.Contains("42"))
-                mask |= (int)VehicleCompat.AV42C;
-            if (compatability.Contains("26"))
-                mask |= (int)VehicleCompat.FA26B;
-            if (compatability.Contains("45"))
-                mask |= (int)VehicleCompat.F45A;
-            if (compatability.Contains("94"))
-                mask |= (int)VehicleCompat.AH94;
-            
-            VehicleCompat compat = (VehicleCompat)mask;
-            
-            if (VehicleCompatibility.CompareTo(compat, VTOLVehicles.AH94))
-            {
-                var resourceString = $"{AH94}/{weaponName}";
-                VTResources.RegisterOverriddenResource(resourceString, equip);
-                VTNetworkManager.RegisterOverrideResource(resourceString, equip);
-            }
+            var pvList = VTResources.GetPlayerVehicleList();
 
-            if (VehicleCompatibility.CompareTo(compat, VTOLVehicles.F45A))
+            foreach (var playerVehicle in pvList.Where(playerVehicle => CustomWeaponsBase.CompareCompat(compatability, playerVehicle.vehicleName, weaponName)))
             {
-                var resourceString = $"{F45}/{weaponName}";
-                VTResources.RegisterOverriddenResource(resourceString, equip);
-                VTNetworkManager.RegisterOverrideResource(resourceString, equip);
+                VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+                VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
             }
-
-            if (VehicleCompatibility.CompareTo(compat, VTOLVehicles.AV42C))
+            /*foreach (var playerVehicle in pvList)
             {
-                var resourceString = $"{AV42}/{weaponName}";
-                VTResources.RegisterOverriddenResource(resourceString, equip);
-                VTNetworkManager.RegisterOverrideResource(resourceString, equip);
-            }
-
-            if (VehicleCompatibility.CompareTo(compat, VTOLVehicles.FA26B))
-            {
-                var resourceString = $"{FA26}/{weaponName}";
-                VTResources.RegisterOverriddenResource(resourceString, equip);
-                VTNetworkManager.RegisterOverrideResource(resourceString, equip);
-            }
+                if (!CustomWeaponsBase.CompareCompat(compatability, playerVehicle.vehicleName, weaponName))
+                {
+                    Debug.Log($"{weaponName} failed with {playerVehicle.vehicleName}");
+                    continue;
+                }
+                Debug.Log($"[CWB]: Adding {weaponName} to '{playerVehicle.equipsResourcePath}/{weaponName}'");
+                VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+                VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+            }*/
             
-            weapons.Add(Tuple.Create<string, GameObject>(weaponName, equip), compat);
+            weapons.Add(Tuple.Create<string, GameObject>(weaponName, equip), compatability);
             
             equip.SetActive(false);
         }
@@ -297,24 +285,23 @@ namespace CustomWeaponBase
         public void LoadAssembly(string path)
         {
             var file = Assembly.LoadFile(path);
-            IEnumerable<Type> source =
+            var source =
                 from t in file.GetTypes()
                 where t.IsSubclassOf(typeof(VTOLMOD))
                 select t;
-            if (source != null && source.Count() == 1)
-            {
-                GameObject go = new GameObject("a mod :~)", source.First());
-                DontDestroyOnLoad(go);
-                go.GetComponent<VTOLMOD>().ModLoaded();
-            }
+            if (source == null || source.Count() != 1) return;
+            
+            var go = new GameObject("a mod :~)", source.First());
+            DontDestroyOnLoad(go);
+            go.GetComponent<VTOLMOD>().ModLoaded();
         }
 
         public void DestroyObjects(CWB_Weapon[] gameObjects)
         {
             foreach (var o in gameObjects)
             {
+                Debug.Log($"[CWB]: Destroying obj: {o.gameObject.name}");
                 Destroy(o.gameObject);
-                Debug.Log("CWB: Destroyed obj.");
             }
         }
     }

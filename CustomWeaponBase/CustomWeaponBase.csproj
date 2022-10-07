@@ -58,6 +58,9 @@
     <Reference Include="UnityEngine">
       <HintPath>..\Dependencies\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
@@ -85,19 +88,20 @@
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
+    <Compile Include="Custom Components\RotaryComponent.cs" />
     <Compile Include="Custom Components\WindingWeapon.cs" />
     <Compile Include="CWB Utils\FileLoader.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="CWB Utils\CustomWeaponBase.cs" />
     <Compile Include="Patches\Patch_HPEquipOML.cs" />
     <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
+    <Compile Include="Patches\Patch_MissileLauncher.cs" />
     <Compile Include="Patches\Patch_MPLobbyData.cs" />
     <Compile Include="Patches\Patch_NetInstantiate.cs" />
     <Compile Include="Patches\Patch_PlayerVehicleSetup.cs" />
     <Compile Include="Patches\Patch_SMSInternalWhateverTheFuck.cs" />
     <Compile Include="Patches\Patch_VTMPScenarioSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VehicleCompatability.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Builds\StreamingAssets\(Template)manifest.json">

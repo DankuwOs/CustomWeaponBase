@@ -14,11 +14,7 @@ public class Patch_NetInstantiate
         {
             if (gameObject == null)
             {
-                Debug.Log($"GameObject from {resourcePath} is null..");
-            }
-            else
-            {
-                Debug.Log($"NetInstantiated Object {gameObject.name}");
+                Debug.Log($"[CWB]: GameObject from {resourcePath} is null..");
             }
             
             __result = gameObject;

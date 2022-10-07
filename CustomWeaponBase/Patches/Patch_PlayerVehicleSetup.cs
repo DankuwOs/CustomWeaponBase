@@ -19,9 +19,8 @@ using UnityEngine;
         {
             var weaponManager = __instance.GetComponent<WeaponManager>();
                 
-            Debug.Log($"Compare hp loadout to hptfs: {VehicleEquipper.loadout.hpLoadout.Length} | {weaponManager.hardpointTransforms.Length}");
+            Debug.Log($"[CWB]: Compare hp loadout to hptfs: {VehicleEquipper.loadout.hpLoadout.Length} | {weaponManager.hardpointTransforms.Length}");
             var difference = VehicleEquipper.loadout.hpLoadout.Length - weaponManager.hardpointTransforms.Length;
-            Debug.Log($"Difference: {difference}");
             for (int i = 0; i < difference; i++)
             {
                 var newTransform = new GameObject($"HP_{weaponManager.hardpointTransforms.Length + 1}").transform;
