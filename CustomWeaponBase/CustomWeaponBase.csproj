@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -93,7 +93,7 @@
     <Compile Include="CWB Utils\FileLoader.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="CWB Utils\CustomWeaponBase.cs" />
-    <Compile Include="Patches\Patch_HPEquipOML.cs" />
+    <Compile Include="Patches\Patch_HPEquipIRML.cs" />
     <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
     <Compile Include="Patches\Patch_MissileLauncher.cs" />
     <Compile Include="Patches\Patch_MPLobbyData.cs" />

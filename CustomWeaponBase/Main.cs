@@ -61,7 +61,7 @@ namespace CustomWeaponBase
         {
 
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
-            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda custom weapons");
+            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda && .cwb custom weapons");
             foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
             {
 
@@ -72,7 +72,7 @@ namespace CustomWeaponBase
             foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
             {
                 
-                Debug.Log("[CWB]: Found .nbda " + file.FullName);
+                Debug.Log("[CWB]: Found .cwb " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, false));
             }
             
@@ -110,11 +110,11 @@ namespace CustomWeaponBase
 
                 #region Legacy
 
-                if (jManifest["Weapons"] == null && jManifest["Missiles"] == null && jManifest["Dependency"] == null)
+                if (jManifest["Weapons"] == null && jManifest["Dependency"] == null)
                 {
                     if (!isNBDA)
                     {
-                        throw new NullReferenceException($"{info.Name} NEEDS TO UPDATE THEIR GODDAMN MANIFEST!!! DO IT!! FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
+                        throw new NullReferenceException($"{info.Name} is using an old manifest, if this pack depends on a dll please update it. FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
                     }
                     
                     Debug.Log($"[CWB]: Loading legacy .nbda: {info.Name}");
@@ -196,13 +196,8 @@ namespace CustomWeaponBase
 
         public void RegisterWeapon(GameObject equip, string weaponName, string compatability)
         {
-            Debug.Log($"[CWB]: Registering {weaponName}");
-            if (!equip)
-            {
-                Debug.Log($"[CWB]: {weaponName} is null!");
-                return;
-            }
-
+            Debug.Log($"Registering weapon: {weaponName}");
+            
             equip.name = weaponName;
             if(!equip.GetComponent<CWB_Weapon>())
                 equip.AddComponent<CWB_Weapon>();
@@ -218,6 +213,16 @@ namespace CustomWeaponBase
 
             if (launcher)
             {
+                switch (launcher)
+                {
+                    case HPEquipIRML launcherIrml:
+                        launcherIrml.irml = launcherIrml.ml as IRMissileLauncher;
+                        break;
+                    case HPEquipOpticalML launcherOpticalMl:
+                        launcherOpticalMl.oml = launcherOpticalMl.ml as OpticalMissileLauncher;
+                        break;
+                }
+
                 if (launcher.ml.missilePrefab && VTResources.Load<GameObject>(launcher.missileResourcePath) == null)
                 {
                     RegisterMissile(launcher.ml.missilePrefab, launcher.missileResourcePath);

@@ -30,14 +30,9 @@ public class Patch_LoadoutConfigurator
             if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
             
             GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
-            if (!Main.allowWMDS && weaponPrefab.GetComponent<CWB_Weapon>().WMD)
-            {
-                weaponPrefab.SetActive(false);
-                continue;
-            }
 
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
-            if (cwbWeapon)
+            if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
             {
                 if (!Main.allowWMDS && cwbWeapon.WMD)
                     continue;
@@ -45,7 +40,7 @@ public class Patch_LoadoutConfigurator
 
             weaponPrefab.name = weapon.Key.Item1;
             EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
-            weaponPrefab.SetActive(false);
+            
 
             unlockedWeaponPrefabs.Add(weapon.Key.Item1, weaponInfo);
             __instance.availableEquipStrings.Add(weapon.Key.Item1);

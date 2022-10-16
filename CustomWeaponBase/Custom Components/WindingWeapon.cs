@@ -58,8 +58,8 @@ public class WindingWeapon : MonoBehaviour
             stopFiring.Invoke();
         }
     }
-    
-    public IEnumerator WindUpWeapon()
+
+    private IEnumerator WindUpWeapon()
     {
         while (true)
         {

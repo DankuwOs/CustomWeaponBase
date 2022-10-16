@@ -1,8 +1,6 @@
 ﻿using Harmony;
 using UnityEngine;
 
-namespace CustomWeaponBase.Patches;
-
 [HarmonyPatch(typeof(SMSInternalWeaponAnimator), nameof(SMSInternalWeaponAnimator.UpdateCurrentProfile))]
 public class Patch_SMSInternalWhateverTheFuck
 {

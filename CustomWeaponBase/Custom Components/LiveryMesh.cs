@@ -15,10 +15,11 @@ public class LiveryMesh : MonoBehaviour
 
     private IEnumerator ApplyMesh()
     {
-        int i = 0;
         while (liveryMeshs[0].material.GetTexture("_DetailAlbedoMap") == _livery)
         {
             Texture2D newLivery = CustomWeaponsBase.instance.GetAircraftLivery(gameObject);
+            
+            Debug.Log($"New livery: {newLivery.name} | Current = {_livery.name} | liveryMesh mat = {liveryMeshs[0].material.GetTexture("_DetailAlbedoMap").name}");
             
             if (newLivery.name == _livery.name)
                 continue;
@@ -28,8 +29,6 @@ public class LiveryMesh : MonoBehaviour
                 renderer.material.SetTexture("_DetailAlbedoMap", newLivery);
                 renderer.material.EnableKeyword("_DETAIL_MULX2");
             }
-
-            i++;
             yield return new WaitForSeconds(1f);
         }
     }

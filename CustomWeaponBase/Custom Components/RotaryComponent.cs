@@ -10,7 +10,7 @@ public class RotaryComponent : MonoBehaviour
 
     public bool doSecondaryRotation;
 
-    [Tooltip("This amount fired and above uses secondaryRotation")]
+    [Tooltip("This amount fired and above uses Secondary Rotation")]
     public int secondaryRotationNumber;
 
     public float secondaryRotation;

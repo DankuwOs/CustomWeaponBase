@@ -77,7 +77,10 @@ public class CustomWeaponsBase : MonoBehaviour
         var wm = baseObject.GetComponentInParent<WeaponManager>();
 
         if (!wm)
+        {
+            Debug.Log($"GetAircraftLivery({baseObject.name}) wm null..");
             return null;
+        }
 
         var aircraft = wm.gameObject;
 
