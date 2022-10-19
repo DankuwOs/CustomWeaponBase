@@ -26,7 +26,7 @@ public class FLKMissile : MonoBehaviour
     {
         if (VTOLMPUtils.IsMultiplayer())
         {
-            VTNetEntity component = base.GetComponent<VTNetEntity>();
+            VTNetEntity component = GetComponent<VTNetEntity>();
             if (component && !component.isMine)
             {
                 return;

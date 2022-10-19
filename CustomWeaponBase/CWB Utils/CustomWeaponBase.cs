@@ -81,11 +81,31 @@ public class CustomWeaponsBase : MonoBehaviour
 
         if (wm)
         {
-            var texture = wm.liverySample.material.GetTexture("_Livery") as Texture2D;
-            return texture;
+            Texture2D livery;
+                
+            livery = wm.liverySample.material.GetTexture("_Livery") as Texture2D;
+            
+            var perBiome = wm.GetComponent<PerBiomeLivery>();
+            MapGenBiome.Biomes currBiome = MapGenBiome.Biomes.Boreal;
+            if (VTMapGenerator.fetch)
+            {
+                currBiome = VTMapGenerator.fetch.biome;
+            }
+            foreach (var biome in perBiome.liveries)
+            {
+                if (biome.biome == currBiome)
+                {
+                    livery = biome.livery;
+                    break;
+                }
+            }
+
+            if (livery)
+                return livery;
+            
+            Debug.Log($"Couldn't find a livery sad");
+            return null;
         }
-        
-        Debug.Log($"GetAircraftLivery({equip.name}) wm null..");
         return null;
     }
 

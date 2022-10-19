@@ -37,7 +37,7 @@ public class CombinedCannon : MonoBehaviour
     
     public void StartFire()
     {
-        this.salvoGuns.Clear();
+        salvoGuns.Clear();
         for (int i = 0; i < _wm.equipCount; i++)
         {
             HPEquippable equippable = _wm.GetEquip(i);

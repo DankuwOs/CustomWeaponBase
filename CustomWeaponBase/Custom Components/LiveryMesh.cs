@@ -26,7 +26,7 @@ public class LiveryMesh : MonoBehaviour
         }
     }
 
-    public void ApplyMesh()
+    public virtual void ApplyMesh()
     {
         var equip = GetComponent<HPEquippable>();
         if (!equip)
@@ -34,7 +34,7 @@ public class LiveryMesh : MonoBehaviour
 
         Texture2D newLivery = CustomWeaponsBase.instance.GetAircraftLivery(equip);
 
-        if (newLivery.name == _livery.name)
+        if (newLivery.name == _livery.name || !newLivery)
             return;
 
         foreach (var renderer in liveryMeshs)

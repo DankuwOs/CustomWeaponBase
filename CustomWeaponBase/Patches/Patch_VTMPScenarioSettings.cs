@@ -19,7 +19,7 @@ public class Inject_GameModeSettingsMainMenu
         {
         
             GameObject settingsTemplate = __instance.iconsIndicator.transform.parent.gameObject;
-            wmd = GameObject.Instantiate(settingsTemplate, settingsTemplate.transform.parent);
+            wmd = Object.Instantiate(settingsTemplate, settingsTemplate.transform.parent);
             wmd.SetActive(true);
             
             wmd.transform.localPosition = new Vector3(-1092,-408,0);
@@ -28,7 +28,7 @@ public class Inject_GameModeSettingsMainMenu
         else
         {
             GameObject settingsTemplate = __instance.lateJoinsIndicator.transform.parent.gameObject;
-            wmd = GameObject.Instantiate(settingsTemplate, settingsTemplate.transform.parent);
+            wmd = Object.Instantiate(settingsTemplate, settingsTemplate.transform.parent);
             wmd.SetActive(true);
 
             wmd.transform.localPosition = new Vector3(-422, -247, 0);
@@ -40,7 +40,7 @@ public class Inject_GameModeSettingsMainMenu
         Debug.Log("Try setup vrInt");
         VRInteractable vrInt = wmd.GetComponent<VRInteractable>();
         vrInt.interactableName = "Allow CWB WMDS";
-        vrInt.OnInteract = new UnityEngine.Events.UnityEvent();
+        vrInt.OnInteract = new UnityEvent();
         vrInt.OnInteract.AddListener(delegate
         {
             Main.allowWMDS = !Main.allowWMDS;

@@ -76,6 +76,12 @@
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -86,11 +92,14 @@
   <ItemGroup>
     <Compile Include="Custom Components\BurstMissile.cs" />
     <Compile Include="Custom Components\CombinedCannon.cs" />
+    <Compile Include="Custom Components\CEMissile.cs" />
+    <Compile Include="Custom Components\CWB Explosion.cs" />
     <Compile Include="Custom Components\CWB Weapon.cs" />
     <Compile Include="Custom Components\FLKMissile.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
+    <Compile Include="Custom Components\LiveryMeshConformal.cs" />
     <Compile Include="Custom Components\RotaryComponent.cs" />
     <Compile Include="Custom Components\WindingWeapon.cs" />
     <Compile Include="CWB Utils\FileLoader.cs" />

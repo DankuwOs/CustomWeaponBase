@@ -27,7 +27,7 @@ public class Patch_CameraFollowMe
         string dir = Path.Combine(VTResources.gameRootDirectory, "Screenshots");
         byte[] png = texture2D.EncodeToPNG();
         
-        UnityEngine.Object.Destroy(texture2D);
+        Object.Destroy(texture2D);
         
         File.WriteAllBytes(FlybyCameraMFDPage.GetNewScreenshotFilepath(dir), png);
         

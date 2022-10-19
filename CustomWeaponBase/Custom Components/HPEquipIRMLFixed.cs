@@ -4,53 +4,53 @@ public class HPEquipIRMLFixed : HPEquipIRML
 {
 	protected override void OnEquip()
 	{
-		this.irml = (IRMissileLauncher) this.ml;
-		this.ml.parentActor = base.weaponManager.actor;
-		if (this.ml.missilePrefab)
+		irml = (IRMissileLauncher) ml;
+		ml.parentActor = weaponManager.actor;
+		if (ml.missilePrefab)
 		{
-			RadarCrossSection component = this.ml.missilePrefab.GetComponent<RadarCrossSection>();
+			RadarCrossSection component = ml.missilePrefab.GetComponent<RadarCrossSection>();
 			if (component)
 			{
-				this.perMissileRCS = component.GetAverageCrossSection();
+				perMissileRCS = component.GetAverageCrossSection();
 			}
 		}
 
-		this.ml.OnFiredMissileIdx -= this.ShakeOnLaunch;
-		this.ml.OnLoadMissile += this.Ml_OnLoadMissile;
-		if (base.weaponManager.isPlayer && this.shakeMagnitude > 0f)
+		ml.OnFiredMissileIdx -= ShakeOnLaunch;
+		ml.OnLoadMissile += Ml_OnLoadMissile;
+		if (weaponManager.isPlayer && shakeMagnitude > 0f)
 		{
-			this.ml.OnFiredMissileIdx += this.ShakeOnLaunch;
+			ml.OnFiredMissileIdx += ShakeOnLaunch;
 		}
 
-		if (this.ml.missiles != null)
+		if (ml.missiles != null)
 		{
-			foreach (Missile missile in this.ml.missiles)
+			foreach (Missile missile in ml.missiles)
 			{
 				if (missile)
 				{
-					missile.gameObject.name = this.ml.missilePrefab.name + " (" + base.weaponManager.actor.actorName + ")";
-					if (base.dlz && base.dlz.missileDlzData == null && missile.dlzData)
+					missile.gameObject.name = ml.missilePrefab.name + " (" + weaponManager.actor.actorName + ")";
+					if (dlz && dlz.missileDlzData == null && missile.dlzData)
 					{
-						base.dlz.missileDlzData = missile.dlzData;
+						dlz.missileDlzData = missile.dlzData;
 					}
 				}
 			}
 		}
 
-		if (!this.trigUncageBoresightOnly)
+		if (!trigUncageBoresightOnly)
 		{
-			HPEquippable.EquipFunction equipFunction = new HPEquippable.EquipFunction();
-			HPEquippable.EquipFunction equipFunction2 = equipFunction;
-			equipFunction2.optionEvent = (HPEquippable.EquipFunction.OptionEvent) Delegate.Combine(equipFunction2.optionEvent, new HPEquippable.EquipFunction.OptionEvent(this.ToggleScanMode));
-			equipFunction.optionName = this.s_seekMode;
-			equipFunction.optionReturnLabel = this.seekerModeLabels[(int) this.seekerMode];
-			HPEquippable.EquipFunction equipFunction3 = new HPEquippable.EquipFunction();
-			HPEquippable.EquipFunction equipFunction4 = equipFunction3;
+			EquipFunction equipFunction = new EquipFunction();
+			EquipFunction equipFunction2 = equipFunction;
+			equipFunction2.optionEvent = (EquipFunction.OptionEvent) Delegate.Combine(equipFunction2.optionEvent, new EquipFunction.OptionEvent(ToggleScanMode));
+			equipFunction.optionName = s_seekMode;
+			equipFunction.optionReturnLabel = seekerModeLabels[(int) seekerMode];
+			EquipFunction equipFunction3 = new EquipFunction();
+			EquipFunction equipFunction4 = equipFunction3;
 			equipFunction4.optionEvent =
-				(HPEquippable.EquipFunction.OptionEvent) Delegate.Combine(equipFunction4.optionEvent, new HPEquippable.EquipFunction.OptionEvent(this.ToggleTriggerUncage));
-			equipFunction3.optionName = this.s_trigUncage;
-			equipFunction3.optionReturnLabel = (this.triggerUncage ? this.s_ON : this.s_OFF);
-			this.equipFunctions = new HPEquippable.EquipFunction[]
+				(EquipFunction.OptionEvent) Delegate.Combine(equipFunction4.optionEvent, new EquipFunction.OptionEvent(ToggleTriggerUncage));
+			equipFunction3.optionName = s_trigUncage;
+			equipFunction3.optionReturnLabel = (triggerUncage ? s_ON : s_OFF);
+			equipFunctions = new EquipFunction[]
 			{
 				equipFunction,
 				equipFunction3
@@ -58,53 +58,53 @@ public class HPEquipIRMLFixed : HPEquipIRML
 		}
 		else
 		{
-			while (this.seekerMode != HeatSeeker.SeekerModes.Uncaged)
+			while (seekerMode != HeatSeeker.SeekerModes.Uncaged)
 			{
-				this.ToggleScanMode();
+				ToggleScanMode();
 			}
 
-			if (!this.triggerUncage)
+			if (!triggerUncage)
 			{
-				this.triggerUncage = true;
-				foreach (Missile missile in this.ml.missiles)
+				triggerUncage = true;
+				foreach (Missile missile in ml.missiles)
 				{
 					if (missile)
 					{
-						missile.heatSeeker.manualUncage = this.triggerUncage;
-						if (this.triggerUncage)
+						missile.heatSeeker.manualUncage = triggerUncage;
+						if (triggerUncage)
 						{
 							missile.heatSeeker.lockingRadar = null;
 						}
 						else
 						{
-							missile.heatSeeker.lockingRadar = base.weaponManager.lockingRadar;
+							missile.heatSeeker.lockingRadar = weaponManager.lockingRadar;
 						}
 					}
 				}
 			}
 		}
 
-		this.ml.parentActor = base.weaponManager.actor;
-		if (base.weaponManager.actor == FlightSceneManager.instance.playerActor)
+		ml.parentActor = weaponManager.actor;
+		if (weaponManager.actor == FlightSceneManager.instance.playerActor)
 		{
-			this.irml.headTransform = VRHead.instance.transform;
+			irml.headTransform = VRHead.instance.transform;
 		}
 
-		this.irml.vssReferenceTransform = base.weaponManager.transform;
-		this.ml.OnLoadMissile -= this.SetupMissile;
-		this.ml.OnLoadMissile += this.SetupMissile;
-		foreach (Missile m in this.ml.missiles)
+		irml.vssReferenceTransform = weaponManager.transform;
+		ml.OnLoadMissile -= SetupMissile;
+		ml.OnLoadMissile += SetupMissile;
+		foreach (Missile m in ml.missiles)
 		{
-			this.SetupMissile(m);
+			SetupMissile(m);
 		}
 
-		if (this.externallyControlInternalBay)
+		if (externallyControlInternalBay)
 		{
-			foreach (InternalWeaponBay internalWeaponBay in base.weaponManager.internalWeaponBays)
+			foreach (InternalWeaponBay internalWeaponBay in weaponManager.internalWeaponBays)
 			{
-				if (internalWeaponBay.hardpointIdx == this.hardpointIdx)
+				if (internalWeaponBay.hardpointIdx == hardpointIdx)
 				{
-					this.iwb = internalWeaponBay;
+					iwb = internalWeaponBay;
 					return;
 				}
 			}

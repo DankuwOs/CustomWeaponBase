@@ -29,7 +29,7 @@ public class Patch_LoadoutConfigurator
             var currentVehicle = PilotSaveManager.currentVehicle;
             if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
             
-            GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
+            GameObject weaponPrefab = Object.Instantiate(weapon.Key.Item2);
 
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
