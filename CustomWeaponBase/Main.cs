@@ -16,8 +16,6 @@ namespace CustomWeaponBase
     {
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
 
-        private readonly string CWBPath = "CustomWeaponBase";
-
         public static Dictionary<Tuple<string, GameObject>, string> weapons = new Dictionary<Tuple<string, GameObject>, string>();
 
         public List<AssetBundle> AssetBundles;
@@ -31,6 +29,7 @@ namespace CustomWeaponBase
 
         public override void ModLoaded()
         {
+            
             HarmonyInstance instance = HarmonyInstance.Create("danku.cwb");
             instance.PatchAll(Assembly.GetExecutingAssembly());
             

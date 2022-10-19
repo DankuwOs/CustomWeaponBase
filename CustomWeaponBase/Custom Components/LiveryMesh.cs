@@ -1,36 +1,52 @@
 ﻿using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class LiveryMesh : MonoBehaviour
 {
+    [Header("PUT AN EMPTY TEXTURE IN YOUR DETAIL ALBEDOx2")]
     public Renderer[] liveryMeshs;
 
+    [Tooltip("Put an empty texture here, used for checking if the ")]
     public Texture2D _livery;
 
-    public void Start()
+    private int i;
+
+    private void Start()
     {
-        StartCoroutine(ApplyMesh());
+        foreach (var renderer in liveryMeshs)
+        {
+            renderer.material.SetTexture("_DetailAlbedoMap", _livery);
+        }
     }
 
-    private IEnumerator ApplyMesh()
+    public void ApplyMesh()
     {
-        while (liveryMeshs[0].material.GetTexture("_DetailAlbedoMap") == _livery)
-        {
-            Texture2D newLivery = CustomWeaponsBase.instance.GetAircraftLivery(gameObject);
+            var equip = GetComponent<HPEquippable>();
+            if (!equip)
+                return;
             
-            Debug.Log($"New livery: {newLivery.name} | Current = {_livery.name} | liveryMesh mat = {liveryMeshs[0].material.GetTexture("_DetailAlbedoMap").name}");
-            
+            Texture2D newLivery = CustomWeaponsBase.instance.GetAircraftLivery(equip);
+
             if (newLivery.name == _livery.name)
-                continue;
+                return;
             
             foreach (var renderer in liveryMeshs)
             {
                 renderer.material.SetTexture("_DetailAlbedoMap", newLivery);
                 renderer.material.EnableKeyword("_DETAIL_MULX2");
             }
-            yield return new WaitForSeconds(1f);
-        }
     }
 
+    private void FixedUpdate()
+    {
+        i++;
+        if (!(i >= 50))
+            return;
+        
+        i = 0;
+
+        ApplyMesh();
+    }
 }
