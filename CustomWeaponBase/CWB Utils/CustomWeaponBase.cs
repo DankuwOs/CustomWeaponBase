@@ -74,12 +74,14 @@ public class CustomWeaponsBase : MonoBehaviour
 
     public Texture2D GetAircraftLivery(HPEquippable equip)
     {
+        if (!equip)
+            return null;
+        
         var wm = equip.weaponManager;
 
         if (wm)
         {
             var texture = wm.liverySample.material.GetTexture("_Livery") as Texture2D;
-            Debug.Log($"[CWB]: Aircraft Livery: {texture}");
             return texture;
         }
         
