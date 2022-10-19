@@ -75,20 +75,15 @@ public class CustomWeaponsBase : MonoBehaviour
     public Texture2D GetAircraftLivery(HPEquippable equip)
     {
         var wm = equip.weaponManager;
-        if (!wm)
+
+        if (wm)
         {
-            Debug.Log($"GetAircraftLivery({equip.name}) wm null..");
-            return null;
+            var texture = wm.liverySample.material.GetTexture("_Livery") as Texture2D;
+            Debug.Log($"[CWB]: Aircraft Livery: {texture}");
+            return texture;
         }
-        var aircraft = wm.gameObject;
-        if (aircraft.name.Contains("FA-26B"))
-            return aircraft.transform.Find("aFighter2").Find("body").GetComponent<MeshRenderer>().material.GetTexture("_Livery") as Texture2D;
-        if (aircraft.name.Contains("SEVTF"))
-            return aircraft.transform.Find("sevtf_layer_2").Find("body.001").GetComponent<MeshRenderer>().material.GetTexture("_Livery") as Texture2D;
-        if (aircraft.name.Contains("AH-94"))
-            return aircraft.transform.Find("ah94_final").Find("exteriorBody").GetComponent<MeshRenderer>().material.GetTexture("_Livery") as Texture2D;
-        if (aircraft.name.Contains("VTOL4"))
-            return aircraft.transform.Find("VT4Body(new)").Find("body_main").GetComponent<MeshRenderer>().material.GetTexture("_Livery") as Texture2D;
+        
+        Debug.Log($"GetAircraftLivery({equip.name}) wm null..");
         return null;
     }
 
