@@ -1,44 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using Harmony;
 using UnityEngine;
 
 public class CWB_Explosion : MonoBehaviour
 {
-    [Serializable]
-    public struct Explosions
-    {
-        public GameObject explosionObject;
+    
+    public GameObject[] explosions;
+    
+    public float shake;
 
-        public float shake;
+    public bool useNormal;
+
+    public bool scaleHierarchy;
+
+    private void Awake()
+    {
+        if (!scaleHierarchy)
+            return;
+        foreach (var explosion in explosions)
+        {
+            var explosionFx = explosion.GetComponent<ExplosionFX>();
+            if (!explosionFx)
+                return;
+            foreach (var ps in explosionFx.particleSystems)
+            {
+                SetScalingMode(ps);
+            }
+        }
     }
 
-    public List<Explosions> explosionsList;
-
-    public void CreateExplosionEffect(GameObject explosion, float shake, Vector3 position, Vector3 normal, float scale = 1f)
+    public void CreateExplosionEffect(GameObject explosion, Vector3 position, Vector3 normal, float scale = 1f)
     {
         var explosionParent = new GameObject("Exploisiosne!")
         {
             transform =
             {
                 position = position,
-                rotation = Quaternion.LookRotation(normal),
-                parent = null
+                rotation = Quaternion.Euler(normal),
+                parent = null,
+                localScale = Vector3.one * scale
             }
         };
+        CustomWeaponsBase.instance.AddObject(explosion);
+        explosionParent.AddComponent<FloatingOriginTransform>();
         
         Instantiate(explosion, explosionParent.transform);
         
-        if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.instance.isCamEnabled && FlybyCameraMFDPage.instance.flybyCam)
-        {
-            try
-            {
-                float num2 = shake * shake / (FlybyCameraMFDPage.instance.flybyCam.transform.position - position).sqrMagnitude;
-                FlybyCameraMFDPage.instance.ShakeCamera(num2 * 2f);
-            }
-            catch (NullReferenceException arg)
-            {
-                Debug.LogError(string.Format("Got an NRE creating an explosion effect despite checking for references first! Likely after a NetDestroy command.\n{0}", arg));
-            }
-        }
+        
+    }
+
+    public void SetScalingMode(ParticleSystem ps)
+    {
+        var main = ps.main;
+        main.scalingMode = ParticleSystemScalingMode.Hierarchy;
     }
 }

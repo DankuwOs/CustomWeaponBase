@@ -92,7 +92,6 @@
   <ItemGroup>
     <Compile Include="Custom Components\BurstMissile.cs" />
     <Compile Include="Custom Components\CombinedCannon.cs" />
-    <Compile Include="Custom Components\CEMissile.cs" />
     <Compile Include="Custom Components\CWB Explosion.cs" />
     <Compile Include="Custom Components\CWB Weapon.cs" />
     <Compile Include="Custom Components\FLKMissile.cs" />
@@ -107,8 +106,10 @@
     <Compile Include="CWB Utils\CustomWeaponBase.cs" />
     <Compile Include="Patches\Patch_ArticulatingHP.cs" />
     <Compile Include="Patches\Patch_CameraFollowMe.cs" />
+    <Compile Include="Patches\Patch_FlightSceneManager.cs" />
     <Compile Include="Patches\Patch_HPEquipIRML.cs" />
     <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
+    <Compile Include="Patches\Patch_Missile.cs" />
     <Compile Include="Patches\Patch_MissileLauncher.cs" />
     <Compile Include="Patches\Patch_MPLobbyData.cs" />
     <Compile Include="Patches\Patch_NetInstantiate.cs" />

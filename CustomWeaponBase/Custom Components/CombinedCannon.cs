@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Harmony;
 using UnityEngine;
 
@@ -16,17 +17,12 @@ public class CombinedCannon : MonoBehaviour
 
     private WeaponManager _wm;
 
-    private void Awake()
-    {
-        if (gun && gun.weaponManager)
-        {
-            _wm = gun.weaponManager;
-        }
-    }
-
     public void ShouldFire(bool fire)
     {
         if (!_wm)
+            _wm = gun.weaponManager;
+        
+        if(!_wm)
             return;
 
         if (fire)

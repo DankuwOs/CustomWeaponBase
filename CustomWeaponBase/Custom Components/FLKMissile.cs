@@ -39,7 +39,6 @@ public class FLKMissile : MonoBehaviour
     private IEnumerator FLKRoutinte()
     {
         
-        
         if (fairings.Length > 0)
             foreach (var missileFairing in fairings)
             {

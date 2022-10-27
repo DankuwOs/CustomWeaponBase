@@ -1,8 +1,10 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CustomWeaponBase;
 using UnityEngine;
+using Object = System.Object;
 
 public class CustomWeaponsBase : MonoBehaviour
 {
@@ -14,11 +16,18 @@ public class CustomWeaponsBase : MonoBehaviour
 
     public List<PlayerVehicle> PlayerVehicles;
 
+    public static List<GameObject> DetachedObjects = new List<GameObject>();
+
     private void Start()
     {
         Debug.Log("[CWB]: Initialized.");
         instance = this;
     }
+
+    public void AddObject(GameObject gameObject) => DetachedObjects.Add(gameObject);
+    public void AddObjects(GameObject[] gameObjects) => DetachedObjects.Add(gameObjects);
+
+    public void DestroyDetachedObjects() => DetachedObjects.ForEach(o => Destroy(o));
 
     private void Update()
     {
