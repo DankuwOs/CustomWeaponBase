@@ -19,6 +19,7 @@ public class BurstMissile : Missile
 
     private IEnumerator BurstMissileRoutine()
     {
+        Debug.Log($"Last Tgt Dist: {lastTargetDistance} | Burst Dist: {distance}");
         while (lastTargetDistance > distance)
         {
             yield return null;
