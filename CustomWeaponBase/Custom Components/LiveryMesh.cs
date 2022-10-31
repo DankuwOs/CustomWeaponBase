@@ -43,15 +43,4 @@ public class LiveryMesh : MonoBehaviour
             renderer.material.EnableKeyword("_DETAIL_MULX2");
         }
     }
-
-    private void FixedUpdate()
-    {
-        i++;
-        if (!(i >= 50))
-            return;
-
-        i = 0;
-
-        ApplyMesh();
-    }
 }
