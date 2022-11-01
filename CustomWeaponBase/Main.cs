@@ -260,17 +260,6 @@ namespace CustomWeaponBase
                 VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
                 VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
             }
-            /*foreach (var playerVehicle in pvList)
-            {
-                if (!CustomWeaponsBase.CompareCompat(compatability, playerVehicle.vehicleName, weaponName))
-                {
-                    Debug.Log($"{weaponName} failed with {playerVehicle.vehicleName}");
-                    continue;
-                }
-                Debug.Log($"[CWB]: Adding {weaponName} to '{playerVehicle.equipsResourcePath}/{weaponName}'");
-                VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
-                VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
-            }*/
             
             weapons.Add(Tuple.Create<string, GameObject>(weaponName, equip), compatability);
             

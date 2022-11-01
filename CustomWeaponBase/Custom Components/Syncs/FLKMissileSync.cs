@@ -3,7 +3,7 @@ using VTNetworking;
 
 public class FLKMissileSync : VTNetSyncRPCOnly
 {
-    public FLKMissile flkMissile;
+    public CWBFLKMissile flkMissile;
     
     protected override void OnNetInitialized()
     {

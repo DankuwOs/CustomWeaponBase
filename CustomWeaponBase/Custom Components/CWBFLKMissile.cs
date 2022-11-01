@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using VTNetworking;
 using VTOLVR.Multiplayer;
 
-public class FLKMissile : MonoBehaviour
+public class CWBFLKMissile : MonoBehaviour
 {
     public Missile missile;
     

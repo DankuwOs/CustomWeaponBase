@@ -30,7 +30,7 @@ public class Patch_LoadoutConfigurator
             if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
             
             GameObject weaponPrefab = Object.Instantiate(weapon.Key.Item2);
-
+            
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
             {

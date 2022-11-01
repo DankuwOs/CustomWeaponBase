@@ -17,6 +17,18 @@ public class CombinedCannon : MonoBehaviour
 
     private WeaponManager _wm;
 
+    private void Awake()
+    {
+        gun.OnEquipped += delegate
+        {
+            var others = gun.weaponManager.GetCombinedEquips().Where(e => e is HPEquipGun && e.shortName == gun.shortName && e != gun);
+            foreach (var hpEquippable in others)
+            {
+                hpEquippable.GetComponent<CombinedCannon>().enabled = false;
+            }
+        };
+    }
+
     public void ShouldFire(bool fire)
     {
         if (!_wm)

@@ -50,7 +50,7 @@ public class ObjectRotator : MonoBehaviour
 
         if (_secondaryObjectsEnabled)
             _rpm /= 5;
-        Debug.Log(_rpm);
+        
         rotationTf.Rotate(rotationAxis, _rpm * Time.deltaTime);
     }
 }

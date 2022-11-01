@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CustomWeaponBase;
+using Harmony;
 using UnityEngine;
-using Object = System.Object;
 
 public class CustomWeaponsBase : MonoBehaviour
 {
@@ -17,6 +17,8 @@ public class CustomWeaponsBase : MonoBehaviour
     public List<PlayerVehicle> PlayerVehicles;
 
     public static List<GameObject> DetachedObjects = new List<GameObject>();
+
+    public GameObject FindWeaponObject;
 
     private void Start()
     {
@@ -39,6 +41,48 @@ public class CustomWeaponsBase : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Minus))
         {
             ReloadWeapons();
+        }
+
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.RightShift) && Input.GetKeyDown(KeyCode.L))
+        {
+            if (FindWeaponObject)
+                Destroy(FindWeaponObject);
+            else
+            {
+                var playersVehicle = VTOLAPI.GetPlayersVehicleGameObject();
+                if (!playersVehicle)
+                    return;
+                var wm = playersVehicle.GetComponent<WeaponManager>();
+                if (!wm)
+                    return;
+                
+
+                var currentEquip = wm.currentEquip;
+                if (!currentEquip)
+                    return;
+
+                FindWeaponObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                FindWeaponObject.transform.SetParent(currentEquip.transform);
+                FindWeaponObject.transform.localPosition = Vector3.zero;
+                FindWeaponObject.transform.localScale = new Vector3(1, 10, 1);
+            }
+        }
+
+        if (Input.GetKey(KeyCode.L) && Input.GetKeyDown(KeyCode.M) && CameraFollowMe.instance)
+        {
+            var idx = Traverse.Create(CameraFollowMe.instance).Field("idx");
+            var wm = VTOLAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
+            if (!wm)
+                return;
+
+            var lastMissile = wm.lastFiredMissile;
+            if (CameraFollowMe.instance.targets.Contains(lastMissile.actor))
+            {
+                var lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
+                CameraFollowMe.instance.SetTargetDebug(false);
+                idx.SetValue(lastMissileIdx);
+                CameraFollowMe.instance.SetTargetDebug(true);
+            }
         }
     }
 

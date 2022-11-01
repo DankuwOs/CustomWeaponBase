@@ -94,7 +94,7 @@
     <Compile Include="Custom Components\CombinedCannon.cs" />
     <Compile Include="Custom Components\CWB Explosion.cs" />
     <Compile Include="Custom Components\CWB Weapon.cs" />
-    <Compile Include="Custom Components\FLKMissile.cs" />
+    <Compile Include="Custom Components\CWBFLKMissile.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
@@ -110,6 +110,7 @@
     <Compile Include="Patches\Patch_CameraFollowMe.cs" />
     <Compile Include="Patches\Patch_FlightSceneManager.cs" />
     <Compile Include="Patches\Patch_HPEquipIRML.cs" />
+    <Compile Include="Patches\Patch_HPEquippable.cs" />
     <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
     <Compile Include="Patches\Patch_Missile.cs" />
     <Compile Include="Patches\Patch_MissileLauncher.cs" />
