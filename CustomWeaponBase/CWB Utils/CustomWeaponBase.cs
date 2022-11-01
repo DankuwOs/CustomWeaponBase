@@ -70,19 +70,34 @@ public class CustomWeaponsBase : MonoBehaviour
 
         if (Input.GetKey(KeyCode.L) && Input.GetKeyDown(KeyCode.M) && CameraFollowMe.instance)
         {
+            Debug.Log("[CWB] LM");
             var idx = Traverse.Create(CameraFollowMe.instance).Field("idx");
+            Debug.Log("idx");
             var wm = VTOLAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
             if (!wm)
                 return;
 
+            Debug.Log("wm");
             var lastMissile = wm.lastFiredMissile;
+            Debug.Log($"last missile: {lastMissile}");
+
+            int lastMissileIdx = 0;
             if (CameraFollowMe.instance.targets.Contains(lastMissile.actor))
             {
-                var lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
-                CameraFollowMe.instance.SetTargetDebug(false);
-                idx.SetValue(lastMissileIdx);
-                CameraFollowMe.instance.SetTargetDebug(true);
+                Debug.Log("contains lm");
+                lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
             }
+            else
+            {
+                CameraFollowMe.instance.AddTarget(lastMissile.actor);
+                lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
+            }
+
+            Debug.Log($"last missile idx: {lastMissileIdx}");
+            CameraFollowMe.instance.SetTargetDebug(false);
+            idx.SetValue(lastMissileIdx);
+            CameraFollowMe.instance.SetTargetDebug(true);
+            Debug.Log($"fin");
         }
     }
 

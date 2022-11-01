@@ -1,10 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class RotaryComponent : MonoBehaviour
 {
     [Header("Rotary Options")]
     public Transform rotaryTransform;
+
+    public Vector3 rotationAxis;
 
     public float rotation;
 
@@ -25,15 +28,20 @@ public class RotaryComponent : MonoBehaviour
     
     [ContextMenu("Test Rotation")]
     public void StartRotating() => StartCoroutine(Rotate());
-    
+
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.K) && Input.GetKeyDown(KeyCode.Alpha8))
+            StartRotating();
+    }
+
     private IEnumerator Rotate()
     {
-        Debug.Log("Trying to rotate");
         var rotationAmount = rotation;
         if (fireCount >= secondaryRotationNumber && doSecondaryRotation)
             rotationAmount = secondaryRotation;
-        
-        var targetRotation = Quaternion.Euler(rotaryTransform.localRotation.eulerAngles + new Vector3(0, 0, rotationAmount));
+
+        var targetRotation = Quaternion.Euler(rotaryTransform.localRotation.eulerAngles + rotationAxis * rotationAmount);
         
         float rotateTime = 0f;
         while (true)

@@ -59,7 +59,7 @@ public class Patch_LoadoutConfigurator
         Debug.Log($"[CWB]: Attempting to add {hpCount} hp's");
         for (int i = 0; i < hpCount; i++)
         {
-            CreateHardpoint(__instance.hpNodes.Length + i, __instance);
+            CreateHardpoint(__instance.hpNodes.Length + 1, __instance);
         }
         
     }

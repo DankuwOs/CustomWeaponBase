@@ -15,7 +15,9 @@ public class Patch_HPEquippable_Equip
             __instance.weaponManager.liverySample.GetPropertyBlock(block);
 
             var livery = block.GetTexture("_Livery");
-            Debug.Log($"Livery: {livery}");
+            if (!livery)
+                return;
+            
             foreach (var mesh in liveryMesh.liveryMeshs)
             {
                 mesh.material.SetTexture("_DetailAlbedoMap", livery);
@@ -39,7 +41,9 @@ public class Patch_HPEquippable_OnConfigAttach
             configurator.wm.liverySample.GetPropertyBlock(block);
 
             var livery = block.GetTexture("_Livery");
-            Debug.Log($"Livery: {livery}");
+            if (!livery)
+                return;
+            
             foreach (var mesh in liveryMesh.liveryMeshs)
             {
                 mesh.material.SetTexture("_DetailAlbedoMap", livery);
