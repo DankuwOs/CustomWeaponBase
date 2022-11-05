@@ -98,7 +98,7 @@
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
-    <Compile Include="Custom Components\Object Rotator.cs" />
+    <Compile Include="Custom Components\ObjectRotator.cs" />
     <Compile Include="Custom Components\RotaryComponent.cs" />
     <Compile Include="Custom Components\Syncs\BurstMissileSync.cs" />
     <Compile Include="Custom Components\Syncs\FLKMissileSync.cs" />
