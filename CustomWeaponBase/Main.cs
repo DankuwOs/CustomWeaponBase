@@ -283,9 +283,10 @@ namespace CustomWeaponBase
                 where t.IsSubclassOf(typeof(VTOLMOD))
                 select t;
             if (source == null || source.Count() != 1) return;
-            
-            var go = new GameObject("a mod :~)", source.First());
+            var mod = source.First();
+            var go = new GameObject($"{mod.Assembly.FullName}", mod);
             DontDestroyOnLoad(go);
+            
             go.GetComponent<VTOLMOD>().ModLoaded();
         }
 

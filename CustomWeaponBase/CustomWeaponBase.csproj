@@ -96,8 +96,9 @@
     <Compile Include="Custom Components\CWB Weapon.cs" />
     <Compile Include="Custom Components\CWBFLKMissile.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
-    <Compile Include="Custom Components\HPEquipIRMLFixed.cs" />
+    <Compile Include="Custom Components\HPEquipGunTurretCombined.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
+    <Compile Include="Custom Components\MeshHider.cs" />
     <Compile Include="Custom Components\ObjectRotator.cs" />
     <Compile Include="Custom Components\RotaryComponent.cs" />
     <Compile Include="Custom Components\Syncs\BurstMissileSync.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Patches\Patch_PlayerVehicleSetup.cs" />
     <Compile Include="Patches\Patch_SMSInternalWhateverTheFuck.cs" />
     <Compile Include="Patches\Patch_VTMPScenarioSettings.cs" />
+    <Compile Include="Patches\Patch_WeaponManagerSync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

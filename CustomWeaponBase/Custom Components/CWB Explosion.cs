@@ -42,12 +42,13 @@ public class CWB_Explosion : MonoBehaviour
                 localScale = Vector3.one * scale
             }
         };
-        CustomWeaponsBase.instance.AddObject(explosion);
+        
+        
         explosionParent.AddComponent<FloatingOriginTransform>();
         
-        Instantiate(explosion, explosionParent.transform);
+        var obj = Instantiate(explosion, explosionParent.transform);
         
-        
+        CustomWeaponsBase.instance.AddObject(obj);
     }
 
     public void SetScalingMode(ParticleSystem ps)

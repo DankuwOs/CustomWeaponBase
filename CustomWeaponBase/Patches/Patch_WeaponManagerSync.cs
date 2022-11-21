@@ -1,32 +1,24 @@
-﻿
-using System.Linq;
-using CustomWeaponBase;
+﻿using System.Linq;
 using Harmony;
 using UnityEngine;
+using VTOLVR.Multiplayer;
 
-[HarmonyPatch(typeof(PlayerVehicleSetup), nameof(PlayerVehicleSetup.SetupForFlight))]
-public class Patch_PlayerVehicleSetup
+[HarmonyPatch(typeof(WeaponManagerSync), "OnNetInitialized")]
+public class Patch_WeaponManagerSync
 {
-    public static void Postfix(PlayerVehicleSetup __instance)
+    public static void Postfix(WeaponManagerSync __instance)
     {
-        if (VehicleEquipper.loadoutSet)
-        {
-            CustomWeaponsBase.instance.Loadout = VehicleEquipper.loadout;
-        }
-    }
-
-    public static void Prefix(PlayerVehicleSetup __instance)
-    {
-        var weaponManager = __instance.GetComponent<WeaponManager>();
-
-        Debug.Log($"[CWB]: Compare hp loadout to hptfs: {VehicleEquipper.loadout.hpLoadout.Length} | {weaponManager.hardpointTransforms.Length}");
+        if (!__instance.wm)
+            return;
+        var weaponManager = __instance.wm;
+        Debug.Log($"[CWB MP]: Compare hp loadout to hptfs: {weaponManager.hardpointTransforms.Length + 3} | {weaponManager.hardpointTransforms.Length}");
         for (int i = 0; i < 3; i++)
         {
             var newTransform = new GameObject($"HP_{weaponManager.hardpointTransforms.Length + 1}").transform;
             newTransform.SetParent(__instance.transform);
             newTransform.localPosition = Vector3.zero;
             newTransform.localRotation = Quaternion.identity;
-
+            
             var tfList = weaponManager.hardpointTransforms.ToList();
             tfList.Add(newTransform);
             weaponManager.hardpointTransforms = tfList.ToArray();

@@ -23,13 +23,17 @@ public class Patch_LoadoutConfigurator
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
         Traverse traverse = Traverse.Create(__instance);
         Dictionary<string, EqInfo> unlockedWeaponPrefabs = (Dictionary<string, EqInfo>)traverse.Field("unlockedWeaponPrefabs").GetValue();
+        
         foreach (var weapon in Main.weapons)
         {
             Debug.Log($"[CWB]: Trying to add {weapon.Key.Item1} to configurator.");
+            
             var currentVehicle = PilotSaveManager.currentVehicle;
             if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
             
+            
             GameObject weaponPrefab = Object.Instantiate(weapon.Key.Item2);
+            
             
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
@@ -45,6 +49,7 @@ public class Patch_LoadoutConfigurator
             unlockedWeaponPrefabs.Add(weapon.Key.Item1, weaponInfo);
             __instance.availableEquipStrings.Add(weapon.Key.Item1);
         }
+        
         
         traverse.Field("unlockedWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
         traverse.Field("allWeaponPrefabs").SetValue(unlockedWeaponPrefabs);

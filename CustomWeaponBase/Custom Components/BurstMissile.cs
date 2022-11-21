@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 public class BurstMissile : Missile
@@ -10,19 +9,13 @@ public class BurstMissile : Missile
     [Tooltip("Event invoked when missile enters distance ↑")]
     public UnityEvent OnBurst = new UnityEvent();
 
-    public override void Fire()
+    public override void FixedUpdate()
     {
-        base.Fire();
-
-        StartCoroutine(BurstMissileRoutine());
-    }
-
-    private IEnumerator BurstMissileRoutine()
-    {
-        Debug.Log($"Last Tgt Dist: {lastTargetDistance} | Burst Dist: {distance}");
-        while (lastTargetDistance > distance)
+        base.FixedUpdate();
+        
+        if (lastTargetDistance > distance)
         {
-            yield return null;
+            return;
         }
         OnBurst.Invoke();
     }

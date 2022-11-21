@@ -57,7 +57,7 @@ public class CustomWeaponsBase : MonoBehaviour
                 var wm = playersVehicle.GetComponent<WeaponManager>();
                 if (!wm)
                     return;
-                
+
 
                 var currentEquip = wm.currentEquip;
                 if (!currentEquip)
@@ -76,7 +76,7 @@ public class CustomWeaponsBase : MonoBehaviour
             {
                 Debug.Log("[CWB] Didn't find CameraFollowMe instance.");
             }
-            
+
             Debug.Log("[CWB] LM");
             var idx = Traverse.Create(CameraFollowMe.instance).Field("idx");
             Debug.Log("idx");
@@ -104,9 +104,9 @@ public class CustomWeaponsBase : MonoBehaviour
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log($"fin");
+            Debug.Log($"finM");
         }
-        
+
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.N))
         {
             if (!CameraFollowMe.instance)
@@ -115,14 +115,14 @@ public class CustomWeaponsBase : MonoBehaviour
             }
 
             var instance = Traverse.Create(CameraFollowMe.instance);
-            
+
             Debug.Log("[CWB] LM");
             var idx = instance.Field("idx");
             Debug.Log($"idx {idx.GetValue()}");
-            
-            
+
+
             var wm = ((Transform)instance.Field("currentTarget").GetValue()).GetComponent<WeaponManager>();
-            
+
             if (!wm)
                 return;
 
@@ -146,71 +146,8 @@ public class CustomWeaponsBase : MonoBehaviour
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log($"fin");
-        }
+            Debug.Log($"finN");
 
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.PageUp))
-        {
-            var playersVehicleGameObject = VTOLAPI.GetPlayersVehicleGameObject();
-            if (!playersVehicleGameObject)
-            {
-                Debug.Log("No player vehicle found..");
-                return;
-            }
-
-            var wm = playersVehicleGameObject.GetComponent<WeaponManager>();
-            if (!wm)
-            {
-                Debug.Log("no wm");
-                return;
-            }
-            
-            for (int i = 0; i < wm.equipCount; i++)
-            {
-                var equip = wm.GetEquip(i);
-                
-                var liveryMesh = equip.GetComponent<LiveryMesh>();
-                Debug.Log("a");
-                if (liveryMesh && liveryMesh.copyMaterial && equip.weaponManager)
-                {
-                    Debug.Log("b");
-                    var objectPaths = liveryMesh.materialPath.Split('/');
-            Debug.Log("j");
-                    var obj = objectPaths.Aggregate(equip.weaponManager.transform, (current, path) => current.Find(path));
-Debug.Log("e");
-                    var renderer = obj.GetComponent<Renderer>();
-Debug.Log("AAAAAAAAAAAAA");
-                    MaterialPropertyBlock block = new MaterialPropertyBlock();
-                    renderer.GetPropertyBlock(block);
-Debug.Log("pssssssss");
-                    foreach (var mesh in liveryMesh.liveryMeshs)
-                    {
-                        Debug.Log("im snaek");
-                        mesh.material = renderer.materials[0];
-                        mesh.SetPropertyBlock(block);
-                    }
-
-                    return;
-                }
-                Debug.Log($"Trying to match liveries for {equip.shortName}");
-                Debug.Log(wm.liverySample);
-                Debug.Log("ha");
-                if (equip.matchLiveries != null && wm.liverySample != null)
-                {
-                    Debug.Log("1");
-                    MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-                    Debug.Log("2");
-                    wm.liverySample.GetPropertyBlock(materialPropertyBlock);
-                    Debug.Log("3");
-                    MeshRenderer[] array = equip.matchLiveries;
-                    Debug.Log("4");
-                    for (int i1 = 0; i1 < array.Length; i1++)
-                    {
-                        Debug.Log("5");
-                        array[i1].SetPropertyBlock(materialPropertyBlock);
-                    }
-                }
-            }
         }
     }
 
