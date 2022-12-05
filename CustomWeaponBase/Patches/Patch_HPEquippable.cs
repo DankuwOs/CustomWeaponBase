@@ -5,8 +5,17 @@ using UnityEngine;
 [HarmonyPatch(typeof(HPEquippable), nameof(HPEquippable.Equip))]
 public class Patch_HPEquippable_Equip
 {
+    [HarmonyPrefix]
+    public static void EquipPrefix(HPEquippable __instance) // Required to fix "Coroutine (GUpdateRoutine) could not be started"
+    {
+        if (!__instance.gameObject.activeSelf)
+        {
+            __instance.gameObject.SetActive(true);
+        }
+    }
+    
     [HarmonyPostfix]
-    public static void Equip(HPEquippable __instance)
+    public static void EquipPostfix(HPEquippable __instance)
     {
         var liveryMesh = __instance.GetComponent<LiveryMesh>();
         if (liveryMesh && liveryMesh.copyMaterial && __instance.weaponManager)

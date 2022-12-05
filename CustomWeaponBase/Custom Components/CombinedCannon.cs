@@ -79,8 +79,10 @@ public class CombinedCannon : MonoBehaviour
             bool firing = Traverse.Create(salvoGuns[i]).Field("firing").GetValue<bool>();
             if (!firing)
                 salvoGuns[i].OnStartFire();
-            
-            yield return new WaitForSeconds(salvoGuns[i].gun.rpm / 60000 * sequentialDelayFactor);
+            if (sequentialDelayFactor > 0.0001f)
+            {
+                yield return new WaitForSeconds(salvoGuns[i].gun.rpm / 60000 * sequentialDelayFactor);
+            }
         }
         yield break;
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MeshHider : MonoBehaviour
 {
@@ -20,6 +18,8 @@ public class MeshHider : MonoBehaviour
     {
         Debug.Log($"[Mesh Hider]: OnEquipped");
         var tf = transform.root;
+        if (!tf.GetComponent<WeaponManager>())
+            return;
         
         foreach (var s in hiddenMeshs)
         {

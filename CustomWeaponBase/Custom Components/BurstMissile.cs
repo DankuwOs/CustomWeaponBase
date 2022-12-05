@@ -9,14 +9,18 @@ public class BurstMissile : Missile
     [Tooltip("Event invoked when missile enters distance ↑")]
     public UnityEvent OnBurst = new UnityEvent();
 
+    private bool _busted;
+
     public override void FixedUpdate()
     {
         base.FixedUpdate();
         
-        if (lastTargetDistance > distance)
+        if (lastTargetDistance > distance || _busted)
         {
             return;
         }
+        
         OnBurst.Invoke();
+        _busted = true;
     }
 }

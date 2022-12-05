@@ -30,19 +30,30 @@ public class Patch_LoadoutConfigurator
             
             var currentVehicle = PilotSaveManager.currentVehicle;
             if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
-            
-            
-            GameObject weaponPrefab = Object.Instantiate(weapon.Key.Item2);
-            
-            
+
+            GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
+
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
             {
-                if (!Main.allowWMDS && cwbWeapon.WMD)
-                    continue;
+                continue;
             }
 
             weaponPrefab.name = weapon.Key.Item1;
+            
+            if (__instance.IsMultiplayer()) // I THINK THIS IS WHY 0/27 NEED TO TEST OH WOW IM DUMB
+            {
+                foreach (MissileLauncher missileLauncher in weaponPrefab.GetComponentsInChildrenImplementing<MissileLauncher>(true))
+                {
+                    if (missileLauncher.loadOnStart)
+                    {
+                        missileLauncher.LoadAllMissiles();
+                    }
+                }
+            }
+            
+            weaponPrefab.SetActive(false); // do need?
+            
             EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
             
 

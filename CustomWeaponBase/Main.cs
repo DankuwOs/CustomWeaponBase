@@ -19,7 +19,6 @@ namespace CustomWeaponBase
         public static Dictionary<Tuple<string, GameObject>, string> weapons = new Dictionary<Tuple<string, GameObject>, string>();
 
         public List<AssetBundle> AssetBundles;
-        
 
         public static bool allowWMDS = true;
 
@@ -34,7 +33,8 @@ namespace CustomWeaponBase
             instance.PatchAll(Assembly.GetExecutingAssembly());
             
             base.ModLoaded();
-            StartCoroutine(LoadCustomCustomBundlesAsync(false));
+            
+            StartCoroutine(LoadCustomBundlesAsync());
 
             GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
             DontDestroyOnLoad(cwb);
@@ -53,12 +53,20 @@ namespace CustomWeaponBase
             var cwbWeapons = FindObjectsOfType<CWB_Weapon>(true);
             if (cwbWeapons.Length > 0)
                 DestroyObjects(cwbWeapons);
-            StartCoroutine(LoadCustomCustomBundlesAsync(true));
+
+            StartCoroutine(LoadCustomBundlesAsync());
         }
 
-        private IEnumerator LoadCustomCustomBundlesAsync(bool reload) // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
+        private IEnumerator LoadCustomBundlesAsync() // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
         {
-
+            if (AssetBundles != null)
+            {
+                foreach (var assetBundle in AssetBundles)
+                {
+                    assetBundle.Unload(true);
+                }
+            }
+            
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
             Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda && .cwb custom weapons");
             foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
@@ -70,7 +78,6 @@ namespace CustomWeaponBase
             Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
             foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
             {
-                
                 Debug.Log("[CWB]: Found .cwb " + file.FullName);
                 StartCoroutine(LoadStreamedWeapons(file, false));
             }
@@ -80,14 +87,6 @@ namespace CustomWeaponBase
 
         private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNBDA)
         {
-            if (AssetBundles != null)
-            {
-                foreach (var assetBundle in AssetBundles)
-                {
-                    assetBundle.Unload(true);
-                }
-            }
-
             AssetBundles = new List<AssetBundle>();
             
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
@@ -167,33 +166,32 @@ namespace CustomWeaponBase
 
                 Dictionary<string, string> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, string>>();
                 if (jsonWeapons != null)
+                {
                     foreach (var weapon in jsonWeapons)
                     {
                         AssetBundleRequest requestWeapon = request.assetBundle.LoadAssetAsync(weapon.Key + ".prefab");
                         yield return requestWeapon;
                         if (requestWeapon == null)
                         {
-                            Debug.LogError($"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
+                            Debug.LogError(
+                                $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
                             continue;
                         }
 
                         GameObject requestWeaponAsset = requestWeapon.asset as GameObject;
-
                         RegisterWeapon(requestWeaponAsset, weapon.Key, weapon.Value);
                     }
-                
-                // Removed missiles from json, they didn't do anything anyway..
+                }
+                request.assetBundle.Unload(false);
             }
             else
             {
                 Debug.Log("[CWB]: Couldn't load streamed bundle " + info.FullName);
             }
-
-            yield break;
         }
 
 
-        public void RegisterWeapon(GameObject equip, string weaponName, string compatability)
+        private void RegisterWeapon(GameObject equip, string weaponName, string compatability)
         {
             Debug.Log($"Registering weapon: {weaponName}");
             
