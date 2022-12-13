@@ -61,11 +61,15 @@ namespace CustomWeaponBase
         {
             if (AssetBundles != null)
             {
-                foreach (var assetBundle in AssetBundles)
+                foreach (var assetBundle in AssetBundles.Where(assetBundle => assetBundle))
                 {
+                    Debug.Log("[CWB]: Unloading a nasty bundle. Disgusting.");
                     assetBundle.Unload(true);
                 }
+
+                AssetBundles.Clear();
             }
+            AssetBundles = new List<AssetBundle>();
             
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
             Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda && .cwb custom weapons");
@@ -87,8 +91,6 @@ namespace CustomWeaponBase
 
         private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNBDA)
         {
-            AssetBundles = new List<AssetBundle>();
-            
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
             yield return request;
 
@@ -173,12 +175,13 @@ namespace CustomWeaponBase
                         yield return requestWeapon;
                         if (requestWeapon == null)
                         {
-                            Debug.LogError(
+                            Debug.Log(
                                 $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
                             continue;
                         }
 
                         GameObject requestWeaponAsset = requestWeapon.asset as GameObject;
+                        
                         RegisterWeapon(requestWeaponAsset, weapon.Key, weapon.Value);
                     }
                 }
@@ -275,7 +278,7 @@ namespace CustomWeaponBase
 
         public void LoadAssembly(string path)
         {
-            var file = Assembly.LoadFile(path);
+            var file = Assembly.LoadFrom(path);
             var source =
                 from t in file.GetTypes()
                 where t.IsSubclassOf(typeof(VTOLMOD))
