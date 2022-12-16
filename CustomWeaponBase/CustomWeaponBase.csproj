@@ -47,6 +47,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\System.Runtime.Serialization.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -119,6 +122,7 @@
     <Compile Include="Patches\Patch_MissileLauncher.cs" />
     <Compile Include="Patches\Patch_MPLobbyData.cs" />
     <Compile Include="Patches\Patch_NetInstantiate.cs" />
+    <Compile Include="Patches\Patch_PlayerVehicle.cs" />
     <Compile Include="Patches\Patch_PlayerVehicleSetup.cs" />
     <Compile Include="Patches\Patch_SMSInternalWhateverTheFuck.cs" />
     <Compile Include="Patches\Patch_VTMPScenarioSettings.cs" />

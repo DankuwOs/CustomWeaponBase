@@ -17,42 +17,8 @@ public class Patch_HPEquippable_Equip
     [HarmonyPostfix]
     public static void EquipPostfix(HPEquippable __instance)
     {
-        var liveryMesh = __instance.GetComponent<LiveryMesh>();
-        if (liveryMesh && liveryMesh.copyMaterial && __instance.weaponManager)
-        {
-            var objectPaths = liveryMesh.materialPath.Split('/');
-            
-            var obj = objectPaths.Aggregate(__instance.weaponManager.transform, (current, path) => current.Find(path));
-
-            var renderer = obj.GetComponent<Renderer>();
-
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            renderer.GetPropertyBlock(block);
-
-            foreach (var mesh in liveryMesh.liveryMeshs)
-            {
-                mesh.material = renderer.materials[0];
-                mesh.SetPropertyBlock(block);
-            }
-
-            return;
-        }
-
-        if (!liveryMesh || !__instance.weaponManager.liverySample) return;
-        {
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            __instance.weaponManager.liverySample.GetPropertyBlock(block);
-
-            var livery = block.GetTexture("_Livery");
-            if (!livery)
-                return;
-            
-            foreach (var mesh in liveryMesh.liveryMeshs)
-            {
-                mesh.material.SetTexture("_DetailAlbedoMap", livery);
-                mesh.material.EnableKeyword("_DETAIL_MULX2");
-            }
-        }
+        CustomWeaponsBase.ApplyLivery(__instance, __instance.weaponManager);
+        CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager);
     }
 }
 
@@ -62,41 +28,17 @@ public class Patch_HPEquippable_OnConfigAttach
     [HarmonyPostfix]
     public static void OnConfigAttach(HPEquippable __instance, LoadoutConfigurator configurator)
     {
-        var liveryMesh = __instance.GetComponent<LiveryMesh>();
-        if (liveryMesh && liveryMesh.copyMaterial && configurator.wm)
-        {
-            var objectPaths = liveryMesh.materialPath.Split('/');
-            
-            var obj = objectPaths.Aggregate(configurator.wm.transform, (current, path) => current.Find(path));
+        CustomWeaponsBase.ApplyLivery(__instance, configurator.wm);
+        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
+    }
+}
 
-            var renderer = obj.GetComponent<Renderer>();
-
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            renderer.GetPropertyBlock(block);
-
-            foreach (var mesh in liveryMesh.liveryMeshs)
-            {
-                mesh.material = renderer.materials[0];
-                mesh.SetPropertyBlock(block);
-            }
-
-            return;
-        }
-        
-        if (liveryMesh && configurator.wm.liverySample)
-        {
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
-            configurator.wm.liverySample.GetPropertyBlock(block);
-
-            var livery = block.GetTexture("_Livery");
-            if (!livery)
-                return;
-            
-            foreach (var mesh in liveryMesh.liveryMeshs)
-            {
-                mesh.material.SetTexture("_DetailAlbedoMap", livery);
-                mesh.material.EnableKeyword("_DETAIL_MULX2");
-            }
-        }
+[HarmonyPatch(typeof(HPEquippable), nameof(HPEquippable.OnConfigDetach))]
+public class Patch_HPEquippable_OnConfigDetach
+{
+    [HarmonyPostfix]
+    public static void OnConfigDetach(HPEquippable __instance, LoadoutConfigurator configurator)
+    {
+        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
     }
 }

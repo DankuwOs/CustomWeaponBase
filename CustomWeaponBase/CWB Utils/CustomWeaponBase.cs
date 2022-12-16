@@ -248,4 +248,89 @@ public class CustomWeaponsBase : MonoBehaviour
             RefreshAllWeapons();
         }
     }
+    
+    public static void ApplyLivery(HPEquippable equippable, WeaponManager weaponManager)
+    {
+        var liveryMesh = equippable.GetComponent<LiveryMesh>();
+        if (liveryMesh && liveryMesh.copyMaterial && weaponManager)
+        {
+            var objectPaths = liveryMesh.materialPath.Split('/');
+            
+            var obj = objectPaths.Aggregate(weaponManager.transform, (current, path) => current.Find(path));
+
+            var renderer = obj.GetComponent<Renderer>();
+
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+
+            foreach (var mesh in liveryMesh.liveryMeshs)
+            {
+                mesh.material = renderer.materials[0];
+                mesh.SetPropertyBlock(block);
+            }
+
+            return;
+        }
+
+        if (!liveryMesh || !weaponManager.liverySample) return;
+        {
+            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            weaponManager.liverySample.GetPropertyBlock(block);
+
+            var livery = block.GetTexture("_Livery");
+            if (!livery)
+                return;
+            
+            foreach (var mesh in liveryMesh.liveryMeshs)
+            {
+                mesh.material.SetTexture("_DetailAlbedoMap", livery);
+                mesh.material.EnableKeyword("_DETAIL_MULX2");
+            }
+        }
+    }
+
+    public static void ToggleMeshHider(HPEquippable equippable, WeaponManager weaponManager, bool enable = false)
+    {
+        var meshHider = equippable.GetComponent<MeshHider>();
+
+        if (!meshHider) return;
+        
+        Debug.Log($"[Mesh Hider]: OnConfigAttach");
+        var tf = weaponManager.transform;
+
+        foreach (var s in meshHider.hiddenMeshs)
+        {
+            var transform = tf;
+
+            string[] subStrings = s.Split('/');
+
+            if (subStrings.Length == 0) return;
+
+            foreach (var subString in subStrings)
+            {
+                var tranny = transform.Find(subString);
+                if (!tranny)
+                {
+                    Debug.Log($"[MeshHider]: Couldn't find {subString} in {transform}");
+                    break;
+                }
+
+                transform = tranny;
+            }
+
+            if (meshHider.hideSubMeshs)
+            {
+                var meshs = transform.GetComponentsInChildren<Renderer>();
+                foreach (var renderer in meshs)
+                {
+                    renderer.enabled = enable;
+                }
+            }
+            else
+            {
+                var mesh = transform.GetComponent<Renderer>();
+                mesh.enabled = enable;
+            }
+        }
+    }
 }

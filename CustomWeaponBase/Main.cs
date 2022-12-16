@@ -114,9 +114,10 @@ namespace CustomWeaponBase
                 {
                     if (!isNBDA)
                     {
-                        throw new NullReferenceException($"{info.Name} is using an old manifest, if this pack depends on a dll please update it. FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
+                        throw new NullReferenceException(
+                            $"{info.Name} is using an old manifest, if this pack depends on a dll please update it. FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
                     }
-                    
+
                     Debug.Log($"[CWB]: Loading legacy .nbda: {info.Name}");
 
                     Dictionary<string, string> jsonLines = jManifest.ToObject<Dictionary<string, string>>();
@@ -135,13 +136,14 @@ namespace CustomWeaponBase
                         GameObject weapon = requestGun.asset as GameObject;
                         RegisterWeapon(weapon, weapon.name, compat);
                     }
+
                     yield break;
                 }
 
                 #endregion
 
-                string dependency = (string) jManifest["Dependency"];
-
+                string dependency = (string)jManifest["Dependency"];
+                
                 if (File.Exists($"{info.DirectoryName}/{dependency}"))
                 {
                     Debug.Log($"[CWB]: Trying to load dependency {dependency}");
@@ -151,9 +153,8 @@ namespace CustomWeaponBase
                 {
                     Debug.Log($"[CWB]: Dependency empty for {info.FullName}");
                 }
-
-                string devDependency = (string) jManifest["DevDependency"];
-
+                
+                string devDependency = (string)jManifest["DevDependency"];
                 if (File.Exists(devDependency))
                 {
                     Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
@@ -163,8 +164,6 @@ namespace CustomWeaponBase
                 {
                     Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency}");
                 }
-
-
 
                 Dictionary<string, string> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, string>>();
                 if (jsonWeapons != null)
@@ -287,10 +286,9 @@ namespace CustomWeaponBase
             var mod = source.First();
             var go = new GameObject($"{mod.Assembly.FullName}", mod);
             DontDestroyOnLoad(go);
-            
+
             go.GetComponent<VTOLMOD>().ModLoaded();
         }
-
         public void DestroyObjects(CWB_Weapon[] gameObjects)
         {
             foreach (var o in gameObjects)
