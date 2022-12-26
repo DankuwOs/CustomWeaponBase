@@ -29,7 +29,12 @@ public class Patch_LoadoutConfigurator
             Debug.Log($"[CWB]: Trying to add {weapon.Key.Item1} to configurator.");
             
             var currentVehicle = PilotSaveManager.currentVehicle;
-            if (!CustomWeaponsBase.CompareCompat(weapon.Value, currentVehicle.vehicleName)) continue;
+            
+            if (weapon.Value is string compat && !CustomWeaponsBase.CompareCompat(compat, currentVehicle.vehicleName))
+                continue;
+            
+            if (!CustomWeaponsBase.CompareCompatNew(weapon.Value, currentVehicle.vehicleName, weapon.Key.Item2.GetComponent<HPEquippable>()))
+                continue;
 
             GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
 
@@ -85,7 +90,7 @@ public class Patch_LoadoutConfigurator
         if (NewHardpoints.Contains(idx))
             return;
 
-        var newTransform = new GameObject($"HP_{idx}").transform;
+        var newTransform = new GameObject($"CWBHP_{idx}").transform;
         newTransform.SetParent(configurator.wm.transform);
         newTransform.localPosition = Vector3.zero;
         newTransform.localRotation = Quaternion.identity;

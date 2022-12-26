@@ -18,11 +18,15 @@ public class Patch_PlayerVehicleSetup
     public static void Prefix(PlayerVehicleSetup __instance)
     {
         var weaponManager = __instance.GetComponent<WeaponManager>();
-
+        
+        var wm = Traverse.Create(weaponManager);
+        if (wm.Field("equips").GetValue<HPEquippable[]>().Any(e => e.gameObject.name.Contains("CWBHB")))
+            return;
+        
         Debug.Log($"[CWB]: Compare hp loadout to hptfs: {VehicleEquipper.loadout.hpLoadout.Length} | {weaponManager.hardpointTransforms.Length}");
         for (int i = 0; i < 3; i++)
         {
-            var newTransform = new GameObject($"HP_{weaponManager.hardpointTransforms.Length + 1}").transform;
+            var newTransform = new GameObject($"CWBHP_{weaponManager.hardpointTransforms.Length + 1}").transform;
             newTransform.SetParent(__instance.transform);
             newTransform.localPosition = Vector3.zero;
             newTransform.localRotation = Quaternion.identity;
@@ -31,7 +35,7 @@ public class Patch_PlayerVehicleSetup
             tfList.Add(newTransform);
             weaponManager.hardpointTransforms = tfList.ToArray();
 
-            var wm = Traverse.Create(weaponManager);
+            
             wm.Field("equips").SetValue(new HPEquippable[weaponManager.hardpointTransforms.Length]);
         }
     }

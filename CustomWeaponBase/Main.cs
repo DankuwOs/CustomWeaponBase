@@ -16,9 +16,9 @@ namespace CustomWeaponBase
     {
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
 
-        public static Dictionary<Tuple<string, GameObject>, string> weapons = new Dictionary<Tuple<string, GameObject>, string>();
+        public static Dictionary<Tuple<string, GameObject>, object> weapons = new Dictionary<Tuple<string, GameObject>, object>(); // realize now than tuples can have more than two im very smart
 
-        public List<AssetBundle> AssetBundles;
+        public List<string> assetBundles;
 
         public static bool allowWMDS = true;
 
@@ -28,7 +28,6 @@ namespace CustomWeaponBase
 
         public override void ModLoaded()
         {
-            
             HarmonyInstance instance = HarmonyInstance.Create("danku.cwb");
             instance.PatchAll(Assembly.GetExecutingAssembly());
             
@@ -59,17 +58,9 @@ namespace CustomWeaponBase
 
         private IEnumerator LoadCustomBundlesAsync() // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
         {
-            if (AssetBundles != null)
-            {
-                foreach (var assetBundle in AssetBundles.Where(assetBundle => assetBundle))
-                {
-                    Debug.Log("[CWB]: Unloading a nasty bundle. Disgusting.");
-                    assetBundle.Unload(true);
-                }
-
-                AssetBundles.Clear();
-            }
-            AssetBundles = new List<AssetBundle>();
+            if (assetBundles != null)
+                assetBundles.Clear();
+            assetBundles = new List<string>();
             
             DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
             Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda && .cwb custom weapons");
@@ -94,9 +85,9 @@ namespace CustomWeaponBase
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
             yield return request;
 
-            if (request.assetBundle)
+            if (request.assetBundle && !assetBundles.Contains(request.assetBundle.name))
             {
-                AssetBundles.Add(request.assetBundle);
+                assetBundles.Add(request.assetBundle.name);
                 AssetBundleRequest requestJson = request.assetBundle.LoadAssetAsync("manifest.json");
                 yield return requestJson;
                 if (requestJson.asset == null)
@@ -165,7 +156,7 @@ namespace CustomWeaponBase
                     Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency}");
                 }
 
-                Dictionary<string, string> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, string>>();
+                Dictionary<string, object> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, object>>();
                 if (jsonWeapons != null)
                 {
                     foreach (var weapon in jsonWeapons)
@@ -193,7 +184,7 @@ namespace CustomWeaponBase
         }
 
 
-        private void RegisterWeapon(GameObject equip, string weaponName, string compatability)
+        private void RegisterWeapon(GameObject equip, string weaponName, object compatability)
         {
             Debug.Log($"Registering weapon: {weaponName}");
             
@@ -254,8 +245,21 @@ namespace CustomWeaponBase
             }
             
             var pvList = VTResources.GetPlayerVehicleList();
+            
+            foreach (var playerVehicle in pvList.Where(playerVehicle =>
+                     {
+                         if (compatability is string compat) // Haters (rider) wants me to make this unreadable. no.
+                         {
+                             return CustomWeaponsBase.CompareCompat(compat, playerVehicle.vehicleName);
+                         }
+                         
+                         if (compatability is Tuple<string, string>[])
+                         {
+                             return CustomWeaponsBase.CompareCompatNew(compatability, playerVehicle.vehicleName, equip.GetComponent<HPEquippable>());
+                         }
 
-            foreach (var playerVehicle in pvList.Where(playerVehicle => CustomWeaponsBase.CompareCompat(compatability, playerVehicle.vehicleName, weaponName)))
+                         return false;
+                     }))
             {
                 VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
                 VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);

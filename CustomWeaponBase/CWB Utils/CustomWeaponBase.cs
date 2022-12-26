@@ -7,6 +7,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using CustomWeaponBase;
 using Harmony;
 using UnityEngine;
+using Valve.Newtonsoft.Json;
 
 public class CustomWeaponsBase : MonoBehaviour
 {
@@ -227,7 +228,8 @@ public class CustomWeaponsBase : MonoBehaviour
         return null;
     }
 
-    public static bool CompareCompat(string compat, string vehicle, string weapon = "")
+    [Obsolete]
+    public static bool CompareCompat(string compat, string vehicle)
     {
         var compats = compat.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
         foreach (var s in compats)
@@ -236,6 +238,29 @@ public class CustomWeaponsBase : MonoBehaviour
                 return true;
         }
 
+        return false;
+    }
+
+    public static bool CompareCompatNew(object compat, string vehicle, HPEquippable equippable)
+    {
+        if (!equippable)
+            return false;
+        var weaponCompat = JsonConvert.DeserializeObject<Dictionary<string, string>[]>(compat.ToString());
+        foreach (var dictionary in weaponCompat)
+        {
+            foreach (var compatability in dictionary)
+            {
+                var compatVehicle = compatability.Key;
+                var compatHardpoints = compatability.Value;
+                
+                if (!vehicle.Contains(compatVehicle))
+                    continue;
+
+                equippable.allowedHardpoints = compatHardpoints;
+
+                return true;
+            }
+        }
         return false;
     }
 

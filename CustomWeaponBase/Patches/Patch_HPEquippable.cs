@@ -39,6 +39,6 @@ public class Patch_HPEquippable_OnConfigDetach
     [HarmonyPostfix]
     public static void OnConfigDetach(HPEquippable __instance, LoadoutConfigurator configurator)
     {
-        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
+        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm, true);
     }
 }
