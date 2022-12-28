@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using Harmony;
-using UnityEngine;
+﻿using Harmony;
 
 [HarmonyPatch(typeof(HPEquippable), nameof(HPEquippable.Equip))]
 public class Patch_HPEquippable_Equip
@@ -19,6 +17,8 @@ public class Patch_HPEquippable_Equip
     {
         CustomWeaponsBase.ApplyLivery(__instance, __instance.weaponManager);
         CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager);
+        
+        
     }
 }
 
