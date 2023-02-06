@@ -3,6 +3,7 @@ using Harmony;
 using UnityEngine;
 using VTNetworking;
 
+
 [HarmonyPatch(typeof(VTNetworkManager), "GetInstantiatePrefab")]
 public class Patch_NetInstantiate
 {

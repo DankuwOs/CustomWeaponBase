@@ -1,7 +1,7 @@
-﻿using System;
-using Harmony;
+﻿using Harmony;
 using UnityEngine;
 using VTNetworking;
+
 
 public class AnimationToggleSync : VTNetSyncRPCOnly
 {
@@ -16,7 +16,7 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
         base.OnNetInitialized();
         
         if (netEntity == null)
-            Debug.Log($"[AnimationToggleSync]: No net entity attached!");
+            Debug.Log("[AnimationToggleSync]: No net entity attached!");
 
         if (!Toggle)
         {

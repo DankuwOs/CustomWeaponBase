@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using VTOLVR.Multiplayer;
 
+
 [HarmonyPatch(typeof(VTMPScenarioSettings), "SetupScenarioSettings")]
 public class Inject_GameModeSettingsMainMenu
 {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
+
 
 public class LiveryMesh : MonoBehaviour
 {

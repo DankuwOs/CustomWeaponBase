@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using UnityEngine;
 
+
 [HarmonyPatch(typeof(PlayerVehicle), nameof(PlayerVehicle.GetEquipPrefab))]
 public class Patch_PlayerVehicle
 {

@@ -1,5 +1,5 @@
 ﻿using Harmony;
-using UnityEngine;
+
 
 [HarmonyPatch(typeof(SMSInternalWeaponAnimator), nameof(SMSInternalWeaponAnimator.UpdateCurrentProfile))]
 public class Patch_SMSInternalWhateverTheFuck

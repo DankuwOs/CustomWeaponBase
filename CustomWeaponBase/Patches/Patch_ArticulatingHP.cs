@@ -2,6 +2,7 @@
 using UnityEngine;
 using VTOLVR.DLC.Rotorcraft;
 
+
 [HarmonyPatch(typeof(ArticulatingHardpoint), "Update")]
 public class Patch_ArticulatingHardpointUpdate
 {
@@ -44,7 +45,7 @@ public class Patch_ArticulatingHardpointUpdate
         {
             HPEquippable equippable = articulatingHardpoint.wm.GetEquip(ahp.hpIdx);
             if (equippable && equippable.shortName == equip.shortName)
-                articulatingHardpoint.SetTilt(ahp, t, false, true);
+                articulatingHardpoint.SetTilt(ahp, t);
         }
     }
 }

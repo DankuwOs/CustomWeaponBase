@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using Harmony;
-using UnityEngine;
+﻿using Harmony;
+
 
 [HarmonyPatch(typeof(HPEquippable), nameof(HPEquippable.Equip))]
 public class Patch_HPEquippable_Equip
@@ -39,6 +38,6 @@ public class Patch_HPEquippable_OnConfigDetach
     [HarmonyPostfix]
     public static void OnConfigDetach(HPEquippable __instance, LoadoutConfigurator configurator)
     {
-        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
+        CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm, true);
     }
 }

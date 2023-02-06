@@ -2,6 +2,7 @@
 using Harmony;
 using UnityEngine;
 
+
 [HarmonyPatch(typeof(CameraFollowMe), nameof(CameraFollowMe.Screenshot))]
 public class Patch_CameraFollowMe
 {
@@ -11,18 +12,18 @@ public class Patch_CameraFollowMe
         int num2 = num / 16 * 9;
         RenderTexture temporary = RenderTexture.GetTemporary(num, num2, 32);
         temporary.antiAliasing = 8;
-            Camera camera = __instance.cam;
-            if (camera.gameObject.activeSelf)
-            {
-                RenderTexture targetTexture = camera.targetTexture;
-                camera.targetTexture = temporary;
-                camera.Render();
-                camera.targetTexture = targetTexture;
-            }
+        Camera camera = __instance.cam;
+        if (camera.gameObject.activeSelf)
+        {
+            RenderTexture targetTexture = camera.targetTexture;
+            camera.targetTexture = temporary;
+            camera.Render();
+            camera.targetTexture = targetTexture;
+        }
 
-            Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGB24, false);
+        Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGB24, false);
         RenderTexture.active = temporary;
-        texture2D.ReadPixels(new Rect(0f, 0f, (float)num, (float)num2), 0, 0);
+        texture2D.ReadPixels(new Rect(0f, 0f, num, num2), 0, 0);
         RenderTexture.ReleaseTemporary(temporary);
         string dir = Path.Combine(VTResources.gameRootDirectory, "Screenshots");
         byte[] png = texture2D.EncodeToPNG();
