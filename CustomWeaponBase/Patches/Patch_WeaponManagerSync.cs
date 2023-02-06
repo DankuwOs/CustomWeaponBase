@@ -1,7 +1,9 @@
 ﻿using System.Linq;
+using CustomWeaponBase;
 using Harmony;
 using UnityEngine;
 using VTOLVR.Multiplayer;
+
 
 [HarmonyPatch(typeof(WeaponManagerSync), "OnNetInitialized")]
 public class Patch_WeaponManagerSync
@@ -14,11 +16,13 @@ public class Patch_WeaponManagerSync
         var weaponManager = __instance.wm;
         
         var wm = Traverse.Create(weaponManager);
-        if (wm.Field("equips").GetValue<HPEquippable[]>().Any(e => e.gameObject.name.Contains("CWBHB")))
+        if (weaponManager.hardpointTransforms.Any(e => e.transform.parent.gameObject.name.Contains("CWBHB")))
             return;
+
+        int hpCount = Main.extraHps;
         
         Debug.Log($"[CWB MP]: Compare hp loadout to hptfs: {weaponManager.hardpointTransforms.Length + 3} | {weaponManager.hardpointTransforms.Length}");
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < hpCount; i++)
         {
             var newTransform = new GameObject($"CWBHP_{weaponManager.hardpointTransforms.Length + 1}").transform;
             newTransform.SetParent(__instance.transform);

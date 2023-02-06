@@ -1,6 +1,5 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
+
 
 public class ObjectRotator : MonoBehaviour
 {
@@ -16,7 +15,7 @@ public class ObjectRotator : MonoBehaviour
 
     public GameObject[] objectsToDisable;
     
-    [Header("Don't touch, for animation.")]
+    [Header("Don't touch, for animations and events.")]
     public bool rotate;
 
     private float _time;
@@ -54,4 +53,8 @@ public class ObjectRotator : MonoBehaviour
         
         rotationTf.Rotate(rotationAxis, _rpm * Time.deltaTime);
     }
+
+    public void Rotate() => rotate = true;
+
+    public void StopRotating() => rotate = false;
 }

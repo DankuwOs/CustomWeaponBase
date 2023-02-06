@@ -1,5 +1,5 @@
-﻿
-using VTNetworking;
+﻿using VTNetworking;
+
 
 public class BurstMissileSync : VTNetSyncRPCOnly
 {

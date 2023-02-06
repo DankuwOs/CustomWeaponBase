@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Harmony;
 using UnityEngine;
+
 
 public class CombinedCannon : MonoBehaviour
 {
@@ -16,6 +16,8 @@ public class CombinedCannon : MonoBehaviour
     public HPEquipGun gun;
 
     private WeaponManager _wm;
+    
+    
 
     private void Awake()
     {
@@ -84,6 +86,5 @@ public class CombinedCannon : MonoBehaviour
                 yield return new WaitForSeconds(salvoGuns[i].gun.rpm / 60000 * sequentialDelayFactor);
             }
         }
-        yield break;
     }
 }

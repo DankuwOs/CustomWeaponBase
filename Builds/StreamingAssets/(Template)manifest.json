@@ -1,8 +1,8 @@
 {
-	"Dependency"    : "DDArmory.dll", // whole line can be removed, points to dll in same folder as AB
-	"DevDependency" : "D:\\Example\\YourFolder\\YourDll.dll" // Remove in release build, replace with Dependency. Only used for loading dlls outside AB folder
+	"Dependency"    : "DllSameFolderAsAssetBundle.dll",
+	"DevDependency" : "D:\\Example\\YourFolder\\YourDll.dll",
 	"Weapons" : {
-		"Prefab_Name"     : [{"94" : "1,2,3,4"}, {"26" : "4,5,6,7"}], // [{"Vehicle 1" : "Hardpoints 1"}, {"Vehicle 2" : "Hardpoints 2"}]
+		"Prefab_Name"     : [{"94" : "1,2,3,4"}, {"26" : "4,5,6,7"}, {"Vehicle" : "Hardpoints"}],
 		"Danku_Gun_Thing" : [{"45" : "1,2,5,6"}]
 	}
 }

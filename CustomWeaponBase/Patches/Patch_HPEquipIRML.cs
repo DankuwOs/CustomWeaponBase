@@ -1,5 +1,5 @@
 ﻿using Harmony;
-using UnityEngine;
+
 
 [HarmonyPatch(typeof(HPEquipIRML), "OnEquip")]
 public class Patch_HPEquipIRML0

@@ -1,4 +1,6 @@
-﻿using Harmony;
+﻿
+using Harmony;
+
 
 [HarmonyPatch(typeof(MissileLauncher), nameof(MissileLauncher.FinallyFire))]
 public class Patch_MissileLauncher

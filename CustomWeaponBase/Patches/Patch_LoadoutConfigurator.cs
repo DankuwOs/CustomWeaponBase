@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CustomWeaponBase;
 using Harmony;
 using UnityEngine;
-using UnityEngine.UI;
+using Valve.Newtonsoft.Json.Linq;
 using VTOLVR.Multiplayer;
-using Object = UnityEngine.Object;
+
 
 [HarmonyPatch(typeof(LoadoutConfigurator), nameof(LoadoutConfigurator.Initialize))]
 public class Patch_LoadoutConfigurator
@@ -30,10 +29,9 @@ public class Patch_LoadoutConfigurator
             
             var currentVehicle = PilotSaveManager.currentVehicle;
             
-            if (weapon.Value is string compat && !CustomWeaponsBase.CompareCompat(compat, currentVehicle.vehicleName))
+            if (weapon.Value is string compatOld && !CustomWeaponsBase.CompareCompat(compatOld, currentVehicle.vehicleName))
                 continue;
-            
-            if (!CustomWeaponsBase.CompareCompatNew(weapon.Value, currentVehicle.vehicleName, weapon.Key.Item2.GetComponent<HPEquippable>()))
+            if (weapon.Value is JArray compatNew && !CustomWeaponsBase.CompareCompatNew(compatNew, currentVehicle.vehicleName, weapon.Key.Item2.GetComponent<HPEquippable>()))
                 continue;
 
             GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
@@ -43,7 +41,7 @@ public class Patch_LoadoutConfigurator
             {
                 continue;
             }
-
+ 
             weaponPrefab.name = weapon.Key.Item1;
             
             if (__instance.IsMultiplayer()) // I THINK THIS IS WHY 0/27 NEED TO TEST OH WOW IM DUMB
@@ -76,7 +74,7 @@ public class Patch_LoadoutConfigurator
     {
         NewHardpoints = new List<int>();
 
-        int hpCount = 3;
+        int hpCount = Main.extraHps;
         Debug.Log($"[CWB]: Attempting to add {hpCount} hp's");
         for (int i = 0; i < hpCount; i++)
         {
@@ -87,7 +85,7 @@ public class Patch_LoadoutConfigurator
 
     private static void CreateHardpoint(int idx, LoadoutConfigurator configurator)
     {
-        if (NewHardpoints.Contains(idx))
+        if (configurator.wm.hardpointTransforms.Any(e => e.transform.parent.gameObject.name.Contains("CWBHB")) || NewHardpoints.Contains(idx))
             return;
 
         var newTransform = new GameObject($"CWBHP_{idx}").transform;

@@ -1,9 +1,6 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using CustomWeaponBase;
 using Harmony;
 using UnityEngine;
@@ -13,14 +10,16 @@ public class CustomWeaponsBase : MonoBehaviour
 {
     public static CustomWeaponsBase instance;
 
-    public WeaponManager MyWeaponManager = null;
+    // Debug
+    public WeaponManager MyWeaponManager;
 
     public Loadout Loadout = null;
 
     public List<PlayerVehicle> PlayerVehicles;
 
+    // Something
     public static List<GameObject> DetachedObjects = new List<GameObject>();
-
+    
     public GameObject FindWeaponObject;
 
     private void Start()
@@ -105,7 +104,7 @@ public class CustomWeaponsBase : MonoBehaviour
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log($"finM");
+            Debug.Log("finM");
         }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.N))
@@ -147,7 +146,7 @@ public class CustomWeaponsBase : MonoBehaviour
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log($"finN");
+            Debug.Log("finN");
 
         }
     }
@@ -156,7 +155,7 @@ public class CustomWeaponsBase : MonoBehaviour
     {
         if (Loadout == null)
         {
-            Debug.LogError($"CWB ReloadWeapons() Loadout null");
+            Debug.LogError("CWB ReloadWeapons() Loadout null");
             
             return;
         }
@@ -166,7 +165,7 @@ public class CustomWeaponsBase : MonoBehaviour
 
         if (MyWeaponManager == null)
         {
-            Debug.LogError($"CWB ReloadWeapons() WM null");
+            Debug.LogError("CWB ReloadWeapons() WM null");
             return;
         }
 
@@ -222,7 +221,7 @@ public class CustomWeaponsBase : MonoBehaviour
             if (livery)
                 return livery;
             
-            Debug.Log($"Couldn't find a livery sad");
+            Debug.Log("Couldn't find a livery sad");
             return null;
         }
         return null;
@@ -320,7 +319,7 @@ public class CustomWeaponsBase : MonoBehaviour
 
         if (!meshHider) return;
         
-        Debug.Log($"[Mesh Hider]: OnConfigAttach");
+        Debug.Log("[Mesh Hider]: OnConfigAttach");
         var tf = weaponManager.transform;
 
         foreach (var s in meshHider.hiddenMeshs)

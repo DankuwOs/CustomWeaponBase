@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
+
 
 public class RotaryComponent : MonoBehaviour
 {

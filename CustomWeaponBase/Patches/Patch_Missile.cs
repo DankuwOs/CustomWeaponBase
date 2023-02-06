@@ -1,12 +1,11 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿
 using Harmony;
 using UnityEngine;
 using UnityEngine.Events;
 using VTOLVR.Multiplayer;
-using Object = UnityEngine.Object;
 
-[HarmonyPatch(typeof(Missile), nameof(Missile.Detonate), new Type[] { typeof(Collider) })]
+
+[HarmonyPatch(typeof(Missile), nameof(Missile.Detonate), typeof(Collider))]
 public class Patch_Missile
 {
     public static bool Prefix(Missile __instance, Collider directHit, Vector3 ___explosionNormal, ref bool ___detonated, UnityAction<Missile> ___OnMissileDetonated)
@@ -31,7 +30,7 @@ public class Patch_Missile
         }
         else
         {
-            Debug.Log($"Missile has no rigidbody attached!");
+            Debug.Log("Missile has no rigidbody attached!");
         }
 
         ___explosionNormal = sourceVelocity;

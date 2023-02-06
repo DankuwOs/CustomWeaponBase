@@ -1,5 +1,5 @@
 ﻿using Harmony;
-using UnityEngine;
+
 
 [HarmonyPatch(typeof(FlightSceneManager), nameof(FlightSceneManager.Awake))]
 public class Patch_FlightSceneManager
