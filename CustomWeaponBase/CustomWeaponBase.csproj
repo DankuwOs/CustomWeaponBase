@@ -97,6 +97,8 @@
     <Compile Include="Custom Components\BurstMissile.cs" />
     <Compile Include="Custom Components\CombinedCannon.cs" />
     <Compile Include="Custom Components\CWBFLKMissile.cs" />
+    <Compile Include="Custom Components\CWB_FuelTank.cs" />
+    <Compile Include="Custom Components\CWB_HPEquipExtension.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
     <Compile Include="Custom Components\HPEquipGunTurretCombined.cs" />
     <Compile Include="Custom Components\LiveryMesh.cs" />
@@ -140,7 +142,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"
-copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.5.4 L2\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
+copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.5.4 L2 - ReImport\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>
