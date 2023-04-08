@@ -34,12 +34,17 @@ public class FLKMissileSync : VTNetSyncRPCOnly
     [VTRPC]
     private void FLKM_OnFire()
     {
+        if (isMine)
+            return;
+        
         flkMissile.OnFire.Invoke();
     }
     
     [VTRPC]
     private void FLKM_OnEmpty()
     {
+        if (isMine)
+            return;
         flkMissile.OnEmpty.Invoke();
     }
 }

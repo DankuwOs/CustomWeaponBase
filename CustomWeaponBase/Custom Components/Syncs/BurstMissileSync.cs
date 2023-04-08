@@ -25,6 +25,9 @@ public class BurstMissileSync : VTNetSyncRPCOnly
     [VTRPC]
     private void BurstMissile_Burst()
     {
+        if (isMine)
+            return;
+        
         burstMissile.OnBurst.Invoke();
     }
 }

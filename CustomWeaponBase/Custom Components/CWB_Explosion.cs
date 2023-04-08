@@ -3,12 +3,17 @@
 
 public class CWB_Explosion : MonoBehaviour
 {
-    
+    [Header("Ensure all of your explosion prefabs do not have a FloatingOriginTransform on them.")]
     public GameObject[] explosions;
     
     public float shake;
 
-    public bool useNormal;
+    [Tooltip("Use direct hit normal, if false will use velocity")]
+    public bool useHitNormal;
+    
+    public Vector3 upAxis = Vector3.up;
+
+    public bool shiftParticles = true;
 
     public bool scaleHierarchy;
 
@@ -16,6 +21,7 @@ public class CWB_Explosion : MonoBehaviour
     {
         if (!scaleHierarchy)
             return;
+        
         foreach (var explosion in explosions)
         {
             var explosionFx = explosion.GetComponent<ExplosionFX>();
@@ -35,17 +41,19 @@ public class CWB_Explosion : MonoBehaviour
             transform =
             {
                 position = position,
-                rotation = Quaternion.Euler(normal),
+                rotation = Quaternion.FromToRotation(upAxis, normal),
                 parent = null,
                 localScale = Vector3.one * scale
             }
         };
         
-        
-        explosionParent.AddComponent<FloatingOriginTransform>();
-        
+        var floatingOriginTransform = explosionParent.AddComponent<FloatingOriginTransform>();
+        floatingOriginTransform.shiftParticles = shiftParticles;
+
         var obj = Instantiate(explosion, explosionParent.transform);
-        
+        obj.SetActive(true);
+
+
         CustomWeaponsBase.instance.AddObject(obj);
     }
 

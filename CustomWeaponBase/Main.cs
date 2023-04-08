@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using CustomWeaponBase.CWB_Utils;
 using Harmony;
+using ModLoader;
 using UnityEngine;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
@@ -17,7 +18,7 @@ namespace CustomWeaponBase
 {
     public class Main : VTOLMOD
     {
-        // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
+        // Some of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
 
         public static Dictionary<Tuple<string, GameObject>, object> weapons = new Dictionary<Tuple<string, GameObject>, object>(); // realize now than tuples can have more than two im very smart
 
@@ -37,7 +38,7 @@ namespace CustomWeaponBase
             instance.PatchAll(Assembly.GetExecutingAssembly());
             
             base.ModLoaded();
-            
+
             StartCoroutine(LoadCustomBundlesAsync());
 
             GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
@@ -194,19 +195,19 @@ namespace CustomWeaponBase
         private void RegisterWeapon(GameObject equip, string weaponName, object compatability)
         {
             Debug.Log($"Registering weapon: {weaponName}");
-            
+
             equip.name = weaponName;
-            if(!equip.GetComponent<CWB_Weapon>())
+            if (!equip.GetComponent<CWB_Weapon>())
                 equip.AddComponent<CWB_Weapon>();
 
             DontDestroyOnLoad(equip);
-            
+
             foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
             {
                 if (!source.outputAudioMixerGroup)
                     source.outputAudioMixerGroup = VTResources.GetExteriorMixerGroup();
             }
-            
+
             HPEquipMissileLauncher launcher = equip.GetComponent<HPEquipMissileLauncher>();
 
             if (launcher)
@@ -225,12 +226,10 @@ namespace CustomWeaponBase
                 {
                     RegisterMissile(launcher.ml.missilePrefab, launcher.missileResourcePath);
                 }
-                
-                // fix your own audio sources and mixers, not my problem.
             }
-            
+
             var pvList = VTResources.GetPlayerVehicleList();
-            
+
             foreach (var playerVehicle in pvList.Where(playerVehicle =>
                      {
                          if (compatability is string compat) // Haters (rider) wants me to make this unreadable. no.
@@ -250,9 +249,9 @@ namespace CustomWeaponBase
                 VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
                 VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
             }
-            
+
             weapons.Add(Tuple.Create(weaponName, equip), compatability);
-            
+
             equip.SetActive(false);
         }
 
@@ -284,6 +283,9 @@ namespace CustomWeaponBase
             foreach (var o in gameObjects)
             {
                 Debug.Log($"[CWB]: Destroying obj: {o.gameObject.name}");
+                var equip = o.gameObject.GetComponent<HPEquippable>();
+                if(equip && equip.isActiveAndEnabled)
+                    equip.OnUnequip();
                 Destroy(o.gameObject);
             }
         }

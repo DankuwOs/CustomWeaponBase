@@ -1,3 +1,4 @@
+using Steamworks.Data;
 using UnityEngine;
 using static CustomWeaponBase.CWB_Utils.HandAnimatorOverride;
 
@@ -33,7 +34,8 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
     
     private AnimationClip vanillaInteractClip;
     
-    private Transform leftLockTransform;
+    [HideInInspector]
+    public Transform leftLockTransform;
 
     public void Start()
     {
@@ -130,5 +132,27 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
         }
 
         RevertGloveAnimationPose(controller.gloveAnimation, vanillaHoverClip, true);
+    }
+    
+    
+    public void SetGloveInteract(GloveAnimation gloveAnimation)
+    {
+        if (!gloveAnimation)
+            return;
+        
+        if (!interactionPoseOverride)
+            gloveAnimation.SetPoseInteractable(interactionPose);
+        else
+            SetGloveAnimationPose(gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
+    }
+
+    public void ClearGloveInteract(GloveAnimation gloveAnimation)
+    {
+        if (!gloveAnimation)
+            return;
+        
+        gloveAnimation.ClearInteractPose();
+
+        RevertGloveAnimationPose(gloveAnimation, vanillaInteractClip);
     }
 }

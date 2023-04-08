@@ -5,9 +5,12 @@
 public class Patch_HPEquippable_Equip
 {
     [HarmonyPrefix]
-    public static void
-        EquipPrefix(HPEquippable __instance) // Required to fix "Coroutine (GUpdateRoutine) could not be started"
+    public static void EquipPrefix(HPEquippable __instance) // Required to fix "Coroutine (GUpdateRoutine) could not be started"
     {
+        // Sometimes when you unequip a weapon the equip will still be a thing in the wm so this should fix maybe
+        if (!__instance)
+            return;
+
         if (!__instance.gameObject.activeSelf)
         {
             __instance.gameObject.SetActive(true);
@@ -23,6 +26,9 @@ public class Patch_HPEquippable_Equip
     [HarmonyPostfix]
     public static void EquipPostfix(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         CustomWeaponsBase.ApplyLivery(__instance, __instance.weaponManager);
         CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager);
 
@@ -41,6 +47,9 @@ public class Patch_HPEquippable_OnEquip
     [HarmonyPostfix]
     public static void OnEquip(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnEquip();
@@ -54,6 +63,9 @@ public class Patch_HPEquippable_OnUnequip
     [HarmonyPostfix]
     public static void OnUnequip(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnUnequip();
@@ -67,6 +79,9 @@ public class Patch_HPEquippable_OnConfigAttach
     [HarmonyPostfix]
     public static void OnConfigAttach(HPEquippable __instance, LoadoutConfigurator configurator)
     {
+        if (!__instance)
+            return;
+
         CustomWeaponsBase.ApplyLivery(__instance, configurator.wm);
         CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
 
@@ -83,6 +98,9 @@ public class Patch_HPEquippable_OnConfigDetach
     [HarmonyPostfix]
     public static void OnConfigDetach(HPEquippable __instance, LoadoutConfigurator configurator)
     {
+        if (!__instance)
+            return;
+
         CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm, true);
 
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
@@ -97,6 +115,9 @@ public class Patch_HPEquippable_Jettison
     [HarmonyPostfix]
     public static void Jettison(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.Jettison();
@@ -110,6 +131,9 @@ public class Patch_HPEquippable_OnJettison
     [HarmonyPostfix]
     public static void OnJettison(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnJettison();
@@ -123,6 +147,9 @@ public class Patch_HPEquippable_OnCycleWeaponButton
     [HarmonyPostfix]
     public static void OnCycleWeaponButton(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnCycleWeaponButton();
@@ -136,6 +163,9 @@ public class Patch_HPEquippable_OnReleasedCycleWeaponButton
     [HarmonyPostfix]
     public static void OnReleasedCycleWeaponButton(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnReleasedCycleWeaponButton();
@@ -149,6 +179,9 @@ public class Patch_HPEquippable_OnDisabledByPartDestroy
     [HarmonyPostfix]
     public static void OnDisabledByPartDestroy(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnDisabledByPartDestroy();
@@ -162,6 +195,9 @@ public class Patch_HPEquippable_OnDisableWeapon
     [HarmonyPostfix]
     public static void OnDisableWeapon(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnDisableWeapon();
@@ -175,6 +211,9 @@ public class Patch_HPEquippable_OnEnableWeapon
     [HarmonyPostfix]
     public static void OnEnableWeapon(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnEnableWeapon();
@@ -188,6 +227,9 @@ public class Patch_HPEquippable_OnQuickloadEquip
     [HarmonyPostfix]
     public static void OnQuickloadEquip(HPEquippable __instance, ConfigNode eqNode)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnQuickloadEquip(eqNode);
@@ -201,6 +243,9 @@ public class Patch_HPEquippable_OnQuicksaveEquip
     [HarmonyPostfix]
     public static void OnQuicksaveEquip(HPEquippable __instance, ConfigNode eqNode)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnQuicksaveEquip(eqNode);
@@ -214,6 +259,9 @@ public class Patch_HPEquippable_OnStartFire
     [HarmonyPostfix]
     public static void OnStartFire(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnStartFire();
@@ -227,6 +275,9 @@ public class Patch_HPEquippable_OnStopFire
     [HarmonyPostfix]
     public static void OnStopFire(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnStopFire();
@@ -240,6 +291,9 @@ public class Patch_HPEquippable_OnTriggerAxis
     [HarmonyPostfix]
     public static void OnTriggerAxis(HPEquippable __instance, float axis)
     {
+        if (!__instance)
+            return;
+        
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnTriggerAxis(axis);
@@ -249,10 +303,13 @@ public class Patch_HPEquippable_OnTriggerAxis
 [HarmonyPatch(typeof(HPEquippable))]
 [HarmonyPatch(nameof(HPEquippable.UpdateWeaponType))]
 public class Patch_HPEquippable_UpdateWeaponType
-{
-[HarmonyPostfix]
+{ 
+    [HarmonyPostfix]
     public static void UpdateWeaponType(HPEquippable __instance)
     {
+        if (!__instance)
+            return;
+
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.UpdateWeaponType();

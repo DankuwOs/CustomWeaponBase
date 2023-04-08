@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -11,7 +12,9 @@ public static class HandAnimatorOverride
         // I lost too much time to this goddamn shit. i was using ng_point this whole time..
         var poseName = hover ? "ng_pinch" : "ng_pointRelaxed";
 
-        outClip = gloveAnimation.animator.runtimeAnimatorController.animationClips.First(e => e.name == poseName);
+        outClip = gloveAnimation.animator.runtimeAnimatorController.animationClips.FirstOrDefault(e => e.name == poseName);
+        if (outClip == null)
+            throw new NullReferenceException("[CWB]: outClip is null!");
 
         if (gloveAnimation.animator.runtimeAnimatorController is not AnimatorOverrideController)
         {

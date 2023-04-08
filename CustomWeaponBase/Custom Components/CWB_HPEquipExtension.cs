@@ -1,10 +1,15 @@
 ﻿using Steamworks.Data;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CWB_HPEquipExtension : MonoBehaviour
 {
     [HideInInspector]
     public HPEquippable hpEquip;
+
+    public UnityEvent OnHPEquip = new();
+
+    public UnityEvent OnHPUnEquip = new();
     
     public virtual void Equip() {}
     
@@ -24,9 +29,9 @@ public class CWB_HPEquipExtension : MonoBehaviour
     
     public virtual void OnEnableWeapon() {}
 
-    public virtual void OnEquip() {}
+    public virtual void OnEquip() { OnHPEquip.Invoke(); }
 
-    public virtual void OnUnequip() {}
+    public virtual void OnUnequip() { OnHPUnEquip.Invoke(); }
     
     public virtual void OnQuickloadEquip(ConfigNode node) {}
     

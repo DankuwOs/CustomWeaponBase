@@ -44,6 +44,9 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
     [VTRPC]
     public void AnimationToggleSyncToggle(bool toggle)
     {
+        if (isMine)
+            return;
+        
         if (toggle != (bool)toggleTraverse.Field("deployed").GetValue())
         {
             _lastDeployed = toggle;

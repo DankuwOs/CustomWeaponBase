@@ -97,6 +97,7 @@
     <Compile Include="Custom Components\BurstMissile.cs" />
     <Compile Include="Custom Components\CombinedCannon.cs" />
     <Compile Include="Custom Components\CWBFLKMissile.cs" />
+    <Compile Include="Custom Components\CWB_HPEquipCMPod.cs" />
     <Compile Include="Custom Components\CWB_FuelTank.cs" />
     <Compile Include="Custom Components\CWB_HPEquipExtension.cs" />
     <Compile Include="Custom Components\HeadTrackObject.cs" />
@@ -107,6 +108,8 @@
     <Compile Include="Custom Components\RotaryComponent.cs" />
     <Compile Include="Custom Components\Syncs\AnimationToggleSync.cs" />
     <Compile Include="Custom Components\Syncs\BurstMissileSync.cs" />
+    <Compile Include="Custom Components\Syncs\CWB_GrabInteractableSync.cs" />
+    <Compile Include="Custom Components\Syncs\CWB_VRInteractableSync.cs" />
     <Compile Include="Custom Components\Syncs\FLKMissileSync.cs" />
     <Compile Include="Custom Components\WindingWeapon.cs" />
     <Compile Include="Custom Components\CustomInteractableScripts\CWB_GrabInteractable.cs" />
@@ -115,6 +118,7 @@
     <Compile Include="Custom Components\CWB_Explosion.cs" />
     <Compile Include="Custom Components\CWB_Weapon.cs" />
     <Compile Include="CWB Utils\FileLoader.cs" />
+    <Compile Include="CWB Utils\HandAnimatorOverride.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="CWB Utils\CustomWeaponBase.cs" />
     <Compile Include="Patches\Patch_ArticulatingHP.cs" />
@@ -142,7 +146,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"
-copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.5.4 L2 - ReImport\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
+copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.6.1\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

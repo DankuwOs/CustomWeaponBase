@@ -15,7 +15,13 @@ public class Patch_ArticulatingHardpointUpdate
             {
                 ArticulatingHardpoint.Hardpoint hardpoint = __instance.hardpoints[i];
                 HPEquippable equip = __instance.wm.GetEquip(hardpoint.hpIdx);
-                if (equip && equip.GetComponent<CWB_Weapon>().articulatingHP)
+                CWB_Weapon cwbWeapon;
+                if (equip)
+                    cwbWeapon = equip.GetComponent<CWB_Weapon>();
+                else
+                    continue;
+                
+                if (cwbWeapon && cwbWeapon.articulatingHP)
                 {
                     UpdateEquip(hardpoint, equip, __instance);
                 }

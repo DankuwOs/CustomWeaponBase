@@ -276,7 +276,9 @@ public class CustomWeaponsBase : MonoBehaviour
     public static void ApplyLivery(HPEquippable equippable, WeaponManager weaponManager)
     {
         var liveryMesh = equippable.GetComponent<LiveryMesh>();
-        if (liveryMesh && liveryMesh.copyMaterial && weaponManager)
+        if (!weaponManager)
+            return;
+        if (liveryMesh && liveryMesh.copyMaterial)
         {
             var objectPaths = liveryMesh.materialPath.Split('/');
             
@@ -303,8 +305,12 @@ public class CustomWeaponsBase : MonoBehaviour
 
             var livery = block.GetTexture("_Livery");
             if (!livery)
+            {
+                
+                Debug.Log($"[LiveryMesh]: Livery null");
                 return;
-            
+            }
+
             foreach (var mesh in liveryMesh.liveryMeshs)
             {
                 mesh.material.SetTexture("_DetailAlbedoMap", livery);
@@ -344,7 +350,7 @@ public class CustomWeaponsBase : MonoBehaviour
 
             if (meshHider.hideSubMeshs)
             {
-                var meshs = transform.GetComponentsInChildren<Renderer>();
+                var meshs = transform.GetComponentsInChildren<Renderer>(true);
                 foreach (var renderer in meshs)
                 {
                     renderer.enabled = enable;

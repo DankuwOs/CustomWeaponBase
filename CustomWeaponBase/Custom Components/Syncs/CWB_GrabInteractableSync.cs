@@ -11,11 +11,11 @@ public class CWB_GrabInteractableSync : VTNetSyncRPCOnly
     {
         base.OnNetInitialized();
         
-        if (base.isMine)
+        if (isMine)
         {
             grabInteractable.OnSetPosition += GrabInteractable_OnSetPosition;
         }
-        VTNetworkManager.instance.OnNewClientConnected += this.Instance_OnNewClientConnected;
+        VTNetworkManager.instance.OnNewClientConnected += Instance_OnNewClientConnected;
     }
 
     public virtual void OnDestroy()
@@ -28,19 +28,23 @@ public class CWB_GrabInteractableSync : VTNetSyncRPCOnly
 
     public virtual void Instance_OnNewClientConnected(SteamId obj)
     {
-        var position = VTMapManager.WorldToGlobalPoint(grabInteractable.transform.position);
-        base.SendDirectedRPC(obj, "GrabInteractable_SetPosition", position, grabInteractable.transform.rotation);
+        if (isMine)
+        {
+            var position = VTMapManager.WorldToGlobalPoint(grabInteractable.transform.position);
+            base.SendDirectedRPC(obj, "GrabInteractable_SetPosition", position, grabInteractable.transform.rotation);
+        }
     }
 
     public virtual void GrabInteractable_OnSetPosition(CWB_GrabInteractable.ObjectPosition objectPosition)
     {
-        base.SendRPC("GrabInteractable_SetPosition", objectPosition);
+        base.SendRPC("GrabInteractable_SetPosition", objectPosition.position, objectPosition.rotation);
     }
 
     [VTRPC]
-    public virtual void GrabInteractable_SetPosition(CWB_GrabInteractable.ObjectPosition objectPosition)
+    public virtual void GrabInteractable_SetPosition(Vector3D objectPosition, Quaternion objectRotation)
     {
-        Debug.Log($"[CWB Grab Int Sync]: Recieved RPC! Position: {objectPosition.position} | Rotation: {objectPosition.rotation}");
-        grabInteractable.RemoteSetPosition(objectPosition.position, objectPosition.rotation);
+        if (isMine)
+            return;
+        grabInteractable.RemoteSetPosition(objectPosition, objectRotation);
     }
 }
