@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -21,10 +22,7 @@ public class RotaryComponent : MonoBehaviour
     public float rotationTime;
 
     public AnimationCurve rotationCurve;
-
     [HideInInspector] public int fireCount;
-
-    private float _time;
     
     [ContextMenu("Test Rotation")]
     public void StartRotating() => StartCoroutine(Rotate());

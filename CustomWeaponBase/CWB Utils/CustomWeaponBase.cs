@@ -276,10 +276,16 @@ public class CustomWeaponsBase : MonoBehaviour
     public static void ApplyLivery(HPEquippable equippable, WeaponManager weaponManager)
     {
         var liveryMesh = equippable.GetComponent<LiveryMesh>();
-        if (!weaponManager)
-            return;
-        if (liveryMesh && liveryMesh.copyMaterial)
+        Debug.Log($"[LiveryMesh]: Applying livery for {equippable.shortName}");
+        if (!weaponManager || !liveryMesh)
         {
+            Debug.Log($"[LiveryMesh]: wm or liverymesh null!");
+            return;
+        }
+
+        if (liveryMesh.copyMaterial)
+        {
+            // I know you can transform.find an entire path now, :~(
             var objectPaths = liveryMesh.materialPath.Split('/');
             
             var obj = objectPaths.Aggregate(weaponManager.transform, (current, path) => current.Find(path));
@@ -298,7 +304,7 @@ public class CustomWeaponsBase : MonoBehaviour
             return;
         }
 
-        if (!liveryMesh || !weaponManager.liverySample) return;
+        if (weaponManager.liverySample)
         {
             MaterialPropertyBlock block = new MaterialPropertyBlock();
             weaponManager.liverySample.GetPropertyBlock(block);
@@ -313,8 +319,15 @@ public class CustomWeaponsBase : MonoBehaviour
 
             foreach (var mesh in liveryMesh.liveryMeshs)
             {
-                mesh.material.SetTexture("_DetailAlbedoMap", livery);
-                mesh.material.EnableKeyword("_DETAIL_MULX2");
+                if (liveryMesh.useLivery)
+                {
+                    mesh.material.SetTexture(liveryMesh.textureID, livery);
+                }
+                else
+                {
+                    mesh.material.SetTexture("_DetailAlbedoMap", livery);
+                    mesh.material.EnableKeyword("_DETAIL_MULX2");
+                }
             }
         }
     }
