@@ -99,11 +99,15 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
         if (!controller.gloveAnimation)
             return;
         
+        
         if (!interactionPoseOverride)
             controller.gloveAnimation.SetPoseInteractable(interactionPose);
         else
-           SetGloveAnimationPose(controller.gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
-        
+        {
+            Debug.Log($"[CWB_VRIntGlovePoser.OnStartinteraction({gameObject.name})]: SetGloveAnimationPose for instance {controller.GetInstanceID()} / {controller.gameObject.name}");
+            SetGloveAnimationPose(controller.gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
+        }
+
         if (lockTransform)
         {
             controller.gloveAnimation.SetLockTransform(controller.isLeft ? leftLockTransform : lockTransform);
@@ -139,11 +143,14 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
     {
         if (!gloveAnimation)
             return;
-        
+
         if (!interactionPoseOverride)
             gloveAnimation.SetPoseInteractable(interactionPose);
         else
+        {
+            Debug.Log($"[CWB_VRIntGlovePoser.SetGloveInteract({gameObject.name})]: SetGloveAnimationPose for instance {gloveAnimation.GetInstanceID()} / {gloveAnimation.gameObject.name}");
             SetGloveAnimationPose(gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
+        }
     }
 
     public void ClearGloveInteract(GloveAnimation gloveAnimation)

@@ -111,39 +111,25 @@ public class CWB_VRInteractableSync : VTNetSyncRPCOnly
 
     public void UpdateInteractable(PlayerModelSync modelSync, bool rightHand)
     {
-        Debug.Log($"[CWB_VRIntSync]: UpdateInteractable");
         var modelSyncTraverse = Traverse.Create(modelSync);
-        Debug.Log($"[CWB_VRIntSync]: Model Sync Traverse created..");
         
         if (rightHand)
         {
-            Debug.Log($"[CWB_VRIntSync]: Right hand int");
             var rhInt = modelSyncTraverse.Field("rhInt").GetValue<VRInteractable>();
-            Debug.Log($"[CWB_VRIntSync]: Got rhInt? {rhInt != null}");
-            
-            Debug.Log($"[CWB_VRIntSync]: Got poser? {vrIntGlovePoser != null}");
-            
+
             if (rhInt)
             {
-                Debug.Log($"[CWB_VRIntSync]: Yes rhInt");
-                
                 modelSyncTraverse.Field("interactingRight").SetValue(true);
-                Debug.Log($"[CWB_VRIntSync]: Yes interacting right");
                 modelSync.remoteGloveR.SetLockTransform(vrIntGlovePoser.lockTransform);
-                Debug.Log($"[CWB_VRIntSync]: set lock tf");
                 
                 vrIntGlovePoser.SetGloveInteract(modelSync.remoteGloveR);
-                Debug.Log($"[CWB_VRIntSync]: Yes set glob interact");
                 return;
             }
 
-            Debug.Log($"[CWB_VRIntSync]: no rhInt");
             modelSyncTraverse.Field("interactingRight").SetValue(false);
-            Debug.Log($"[CWB_VRIntSync]: no rhInteracting");
             modelSync.remoteGloveR.ClearInteractPose();
-            Debug.Log($"[CWB_VRIntSync]: no pose");
+            
             vrIntGlovePoser.ClearGloveInteract(modelSync.remoteGloveR);
-            Debug.Log($"[CWB_VRIntSync]: fin");
             return;
         }
         

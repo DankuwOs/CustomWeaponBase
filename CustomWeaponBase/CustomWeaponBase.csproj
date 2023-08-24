@@ -121,6 +121,7 @@
     <Compile Include="CWB Utils\HandAnimatorOverride.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="CWB Utils\CustomWeaponBase.cs" />
+    <Compile Include="Patches\Patch_AircraftLiveryApplicator.cs" />
     <Compile Include="Patches\Patch_ArticulatingHP.cs" />
     <Compile Include="Patches\Patch_CameraFollowMe.cs" />
     <Compile Include="Patches\Patch_FlightSceneManager.cs" />

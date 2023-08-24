@@ -3,20 +3,15 @@ using VTOLVR.Multiplayer;
 
 public class HPEquipGunTurretCombined : HPEquipGunTurret
 {
-    
     public Gun gun2;
 
     public bool useCollective;
 
     private Gun _originalGun;
 
-    private GunSync _gunSync;
-
     protected override void OnEquip()
     {
         base.OnEquip();
-
-        _gunSync = GetComponent<GunSync>();
         
         _originalGun = gun;
 
@@ -51,8 +46,5 @@ public class HPEquipGunTurretCombined : HPEquipGunTurret
     public void ToggleGun()
     {
         gun = gun == _originalGun ? gun2 : _originalGun;
-        
-        if (_gunSync)
-            _gunSync.gun = gun == _originalGun ? gun2 : _originalGun;
     }
 }

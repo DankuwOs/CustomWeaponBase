@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using UnityEngine;
 
 [HarmonyPatch(typeof(HPEquippable))]
 [HarmonyPatch(nameof(HPEquippable.Equip))]
@@ -7,7 +8,6 @@ public class Patch_HPEquippable_Equip
     [HarmonyPrefix]
     public static void EquipPrefix(HPEquippable __instance) // Required to fix "Coroutine (GUpdateRoutine) could not be started"
     {
-        // Sometimes when you unequip a weapon the equip will still be a thing in the wm so this should fix maybe
         if (!__instance)
             return;
 
@@ -28,8 +28,10 @@ public class Patch_HPEquippable_Equip
     {
         if (!__instance)
             return;
-
+        
+        // Just incase
         CustomWeaponsBase.ApplyLivery(__instance, __instance.weaponManager);
+        
         CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager);
 
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
@@ -65,7 +67,9 @@ public class Patch_HPEquippable_OnUnequip
     {
         if (!__instance)
             return;
-
+        
+        CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager, true);
+        
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
         if (extension)
             extension.OnUnequip();
@@ -82,7 +86,6 @@ public class Patch_HPEquippable_OnConfigAttach
         if (!__instance)
             return;
 
-        CustomWeaponsBase.ApplyLivery(__instance, configurator.wm);
         CustomWeaponsBase.ToggleMeshHider(__instance, configurator.wm);
 
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
@@ -315,4 +318,20 @@ public class Patch_HPEquippable_UpdateWeaponType
             extension.UpdateWeaponType();
     }
 }
-    
+
+
+[HarmonyPatch(typeof(HPEquippable))]
+[HarmonyPatch(nameof(HPEquippable.ApplyLivery))]
+public class Patch_HPEquippable_ApplyLivery
+{ 
+    [HarmonyPostfix]
+    public static void ApplyLivery(HPEquippable __instance, WeaponManager wm)
+    {
+        if (!__instance)
+            return;
+        
+        CustomWeaponsBase.ApplyLivery(__instance, wm);
+    }
+}
+
+

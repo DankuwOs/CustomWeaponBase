@@ -31,21 +31,23 @@ public class Patch_LoadoutConfigurator
             
             if (weapon.Value is string compatOld && !CustomWeaponsBase.CompareCompat(compatOld, currentVehicle.vehicleName))
                 continue;
-            if (weapon.Value is JArray compatNew && !CustomWeaponsBase.CompareCompatNew(compatNew, currentVehicle.vehicleName, weapon.Key.Item2.GetComponent<HPEquippable>()))
+            if (weapon.Value is JArray compatNew && !CustomWeaponsBase.CompareCompatNew(compatNew, currentVehicle.vehicleName, weapon.Key.Item2?.GetComponent<HPEquippable>()))
                 continue;
 
             GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
-
             var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
+            
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
             {
                 continue;
             }
  
+            
             weaponPrefab.name = weapon.Key.Item1;
             
             if (__instance.IsMultiplayer()) // I THINK THIS IS WHY 0/27 NEED TO TEST OH WOW IM DUMB
             {
+                
                 foreach (MissileLauncher missileLauncher in weaponPrefab.GetComponentsInChildrenImplementing<MissileLauncher>(true))
                 {
                     if (missileLauncher.loadOnStart)
@@ -85,7 +87,7 @@ public class Patch_LoadoutConfigurator
 
     private static void CreateHardpoint(int idx, LoadoutConfigurator configurator)
     {
-        if (configurator.wm.hardpointTransforms.Any(e => e.transform.parent.gameObject.name.Contains("CWBHB")) || NewHardpoints.Contains(idx))
+        if (configurator.wm.hardpointTransforms.Any(e => !e || !e.parent || e.parent.gameObject.name.Contains("CWBHB")) || NewHardpoints.Contains(idx))
             return;
 
         var newTransform = new GameObject($"CWBHP_{idx}").transform;
@@ -118,7 +120,9 @@ public class Patch_LoadoutConfigurator
         NewHardpoints.Add(idx);
         
         var nodeList = configurator.hpNodes.ToList();
+        
         nodeList.Add(hpObj.GetComponent<HPConfiguratorNode>());
+        
         configurator.hpNodes = nodeList.ToArray();
         
         Debug.Log($"[CWB]: Added custom HP {idx}");

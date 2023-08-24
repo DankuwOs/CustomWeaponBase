@@ -272,27 +272,28 @@ public class CustomWeaponsBase : MonoBehaviour
             RefreshAllWeapons();
         }
     }
-    
+
     public static void ApplyLivery(HPEquippable equippable, WeaponManager weaponManager)
     {
         var liveryMesh = equippable.GetComponent<LiveryMesh>();
-        Debug.Log($"[LiveryMesh]: Applying livery for {equippable.shortName}");
+
         if (!weaponManager || !liveryMesh)
         {
-            Debug.Log($"[LiveryMesh]: wm or liverymesh null!");
             return;
         }
 
+        MaterialPropertyBlock block;
+        
         if (liveryMesh.copyMaterial)
         {
             // I know you can transform.find an entire path now, :~(
             var objectPaths = liveryMesh.materialPath.Split('/');
-            
+
             var obj = objectPaths.Aggregate(weaponManager.transform, (current, path) => current.Find(path));
 
             var renderer = obj.GetComponent<Renderer>();
 
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
+            block = new MaterialPropertyBlock();
             renderer.GetPropertyBlock(block);
 
             foreach (var mesh in liveryMesh.liveryMeshs)
@@ -303,31 +304,40 @@ public class CustomWeaponsBase : MonoBehaviour
 
             return;
         }
-
+        
+        block = new MaterialPropertyBlock();
+        
         if (weaponManager.liverySample)
-        {
-            MaterialPropertyBlock block = new MaterialPropertyBlock();
             weaponManager.liverySample.GetPropertyBlock(block);
-
-            var livery = block.GetTexture("_Livery");
-            if (!livery)
-            {
-                
-                Debug.Log($"[LiveryMesh]: Livery null");
+        else if (!string.IsNullOrEmpty(liveryMesh.materialPath))
+        {
+            var materialObj = weaponManager.transform.Find(liveryMesh.materialPath);
+            if (!materialObj)
                 return;
-            }
+            
+            var meshRenderer = materialObj.GetComponent<MeshRenderer>();
+            if (!meshRenderer)
+                return;
+            meshRenderer.GetPropertyBlock(block);
+        }
 
-            foreach (var mesh in liveryMesh.liveryMeshs)
+        var livery = block.GetTexture("_Livery");
+        if (!livery)
+        {
+            Debug.Log($"[LiveryMesh]: Livery null");
+            return;
+        }
+
+        foreach (var mesh in liveryMesh.liveryMeshs)
+        {
+            if (liveryMesh.useLivery)
             {
-                if (liveryMesh.useLivery)
-                {
-                    mesh.material.SetTexture(liveryMesh.textureID, livery);
-                }
-                else
-                {
-                    mesh.material.SetTexture("_DetailAlbedoMap", livery);
-                    mesh.material.EnableKeyword("_DETAIL_MULX2");
-                }
+                mesh.material.SetTexture(liveryMesh.textureID, livery);
+            }
+            else
+            {
+                mesh.material.SetTexture("_DetailAlbedoMap", livery);
+                mesh.material.EnableKeyword("_DETAIL_MULX2");
             }
         }
     }
@@ -337,8 +347,7 @@ public class CustomWeaponsBase : MonoBehaviour
         var meshHider = equippable.GetComponent<MeshHider>();
 
         if (!meshHider) return;
-        
-        Debug.Log("[Mesh Hider]: OnConfigAttach");
+
         var tf = weaponManager.transform;
 
         foreach (var s in meshHider.hiddenMeshs)
