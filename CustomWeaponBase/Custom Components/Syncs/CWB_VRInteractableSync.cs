@@ -1,7 +1,4 @@
-﻿
-using CustomWeaponBase.CWB_Utils;
-using Harmony;
-using UnityEngine;
+﻿using Harmony;
 using VTNetworking;
 
 public class CWB_VRInteractableSync : VTNetSyncRPCOnly
@@ -61,11 +58,12 @@ public class CWB_VRInteractableSync : VTNetSyncRPCOnly
     {
         if (!isMine)
         {
+            _isRightController = isRight == 1;
             var playerModelSync = PlayerModelSync.GetPlayerModel(steamId);
             if (vrIntGlovePoser)
-                SetRemoteInteractable(playerModelSync, isRight == 1, interactable);
+                SetRemoteInteractable(playerModelSync, _isRightController, interactable);
             else 
-                playerModelSync.SetRemoteInteractable(isRight == 1, interactable);
+                playerModelSync.SetRemoteInteractable(_isRightController, interactable);
             
             interactable.OnInteract.Invoke();
         }
@@ -95,17 +93,17 @@ public class CWB_VRInteractableSync : VTNetSyncRPCOnly
         }
     }
 
-    public void SetRemoteInteractable(PlayerModelSync modelSync, bool rightHand, VRInteractable interactable)
+    public void SetRemoteInteractable(PlayerModelSync modelSync, bool rightHand, VRInteractable remoteInteractable)
     {
         var modelSyncTraverse = Traverse.Create(modelSync);
         if (rightHand)
         {
-            modelSyncTraverse.Field("rhInt").SetValue(interactable);
+            modelSyncTraverse.Field("rhInt").SetValue(remoteInteractable);
             UpdateInteractable(modelSync, true);
             return;
         }
 
-        modelSyncTraverse.Field("lhInt").SetValue(interactable);
+        modelSyncTraverse.Field("lhInt").SetValue(remoteInteractable);
         UpdateInteractable(modelSync, false);
     }
 

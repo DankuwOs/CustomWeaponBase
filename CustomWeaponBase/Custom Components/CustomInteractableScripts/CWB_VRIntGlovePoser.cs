@@ -81,7 +81,7 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
 
     public void Vrint_OnHover(VRHandController controller)
     {
-        if (!controller.gloveAnimation)
+        if (!controller.gloveAnimation || !controller.hoverInteractable?.poseBounds)
             return;
         
         if (!hoverPoseOverride)
@@ -104,7 +104,6 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
             controller.gloveAnimation.SetPoseInteractable(interactionPose);
         else
         {
-            Debug.Log($"[CWB_VRIntGlovePoser.OnStartinteraction({gameObject.name})]: SetGloveAnimationPose for instance {controller.GetInstanceID()} / {controller.gameObject.name}");
             SetGloveAnimationPose(controller.gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
         }
 
@@ -126,7 +125,7 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
 
     public void Vrint_OnUnHover(VRHandController controller)
     {
-        if (!controller.gloveAnimation)
+        if (!controller.gloveAnimation|| !controller.hoverInteractable?.poseBounds)
             return;
 
         if (!interactionPoseOverride)
@@ -148,7 +147,6 @@ public class CWB_VRIntGlovePoser : MonoBehaviour
             gloveAnimation.SetPoseInteractable(interactionPose);
         else
         {
-            Debug.Log($"[CWB_VRIntGlovePoser.SetGloveInteract({gameObject.name})]: SetGloveAnimationPose for instance {gloveAnimation.GetInstanceID()} / {gloveAnimation.gameObject.name}");
             SetGloveAnimationPose(gloveAnimation, interactionPoseOverride, out vanillaInteractClip);
         }
     }

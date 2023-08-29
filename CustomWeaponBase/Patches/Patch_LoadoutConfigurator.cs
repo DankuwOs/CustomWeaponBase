@@ -35,7 +35,7 @@ public class Patch_LoadoutConfigurator
                 continue;
 
             GameObject weaponPrefab = GameObject.Instantiate(weapon.Key.Item2);
-            var cwbWeapon = weaponPrefab.GetComponent<CWB_Weapon>();
+            var cwbWeapon = weaponPrefab?.GetComponent<CWB_Weapon>();
             
             if (cwbWeapon && !Main.allowWMDS && cwbWeapon.WMD)
             {

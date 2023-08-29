@@ -12,8 +12,7 @@ public static class HandAnimatorOverride
         // I lost too much time to this goddamn shit. i was using ng_point this whole time..
         var poseName = hover ? "ng_pinch" : "ng_pointRelaxed";
         
-        Debug.Log($"[CWB]: Setting animation pose {poseName} for instance {gloveAnimation.GetInstanceID()} / {gloveAnimation.gameObject.name}");
-
+        
         outClip = gloveAnimation.animator.runtimeAnimatorController.animationClips.FirstOrDefault(e => e.name == poseName);
         if (outClip == null)
             throw new NullReferenceException($"[CWB]: outClip is null for instance {gloveAnimation.GetInstanceID()} / {gloveAnimation.gameObject.name}");
@@ -47,6 +46,7 @@ public static class HandAnimatorOverride
     public static void RevertGloveAnimationPose(GloveAnimation gloveAnimation, AnimationClip clip, bool hover = false)
     {
         var poseName = hover ? "ng_pinch" : "ng_pointRelaxed";
+        
         
         AnimatorOverrideController overrideAnimController = null;
 
