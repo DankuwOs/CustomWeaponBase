@@ -11,9 +11,10 @@ public class BurstMissile : Missile
 
     private bool _busted;
 
-    public override void FixedUpdate()
+    // Fix something I spose
+    public override void BPU_FixedUpdate()
     {
-        base.FixedUpdate();
+        base.BPU_FixedUpdate();
         
         if (lastTargetDistance > distance || _busted)
         {

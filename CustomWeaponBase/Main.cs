@@ -111,7 +111,7 @@ namespace CustomWeaponBase
 
                 #region Legacy
 
-                if (jManifest["Weapons"] == null && jManifest["Dependency"] == null)
+                if (jManifest["Weapons"] == null)
                 {
                     if (!isNBDA)
                     {
@@ -142,28 +142,34 @@ namespace CustomWeaponBase
                 }
 
                 #endregion
+                
+                
+                if (jManifest["Dependency"] != null)
+                {
+                    string dependency = (string)jManifest["Dependency"];
+                    if (File.Exists($"{info.DirectoryName}/{dependency}"))
+                    {
+                        Debug.Log($"[CWB]: Trying to load dependency @ {dependency}");
+                        LoadAssembly($"{info.DirectoryName}/{dependency}");
+                    }
+                    else
+                    {
+                        Debug.Log($"[CWB]: Dependency empty for {info.FullName} (Empty line, not an issue.)");
+                    }
+                }
 
-                string dependency = (string)jManifest["Dependency"];
-                
-                if (File.Exists($"{info.DirectoryName}/{dependency}"))
+                if (jManifest["DevDependency"] != null)
                 {
-                    Debug.Log($"[CWB]: Trying to load dependency {dependency}");
-                    LoadAssembly($"{info.DirectoryName}/{dependency}");
-                }
-                else
-                {
-                    Debug.Log($"[CWB]: Dependency empty for {info.FullName}");
-                }
-                
-                string devDependency = (string)jManifest["DevDependency"];
-                if (File.Exists(devDependency))
-                {
-                    Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
-                    LoadAssembly(devDependency);
-                }
-                else if (!string.IsNullOrEmpty(devDependency))
-                {
-                    Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency}");
+                    string devDependency = (string)jManifest["DevDependency"];
+                    if (File.Exists(devDependency))
+                    {
+                        Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
+                        LoadAssembly(devDependency);
+                    }
+                    else if (!string.IsNullOrEmpty(devDependency))
+                    {
+                        Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency} (Empty line, not an issue.)");
+                    }
                 }
 
                 Dictionary<string, object> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, object>>();

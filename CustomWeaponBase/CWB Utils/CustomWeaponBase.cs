@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using CustomWeaponBase;
 using Harmony;
@@ -43,6 +44,11 @@ public class CustomWeaponsBase : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Minus))
         {
             ReloadWeapons();
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
+        {
+            HDRScreenshot(); // oops left this in but its there now
         }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.RightShift) && Input.GetKeyDown(KeyCode.L))
@@ -149,6 +155,34 @@ public class CustomWeaponsBase : MonoBehaviour
             Debug.Log("finN");
 
         }
+    }
+
+    public void HDRScreenshot()
+    {
+        int num = 3840;
+        int num2 = num / 16 * 9;
+        RenderTexture temporary = RenderTexture.GetTemporary(num, num2, 32, RenderTextureFormat.ARGBHalf);
+        temporary.antiAliasing = 8;
+        var cameraFollowMe = CameraFollowMe.instance;
+        Camera camera = cameraFollowMe.cam;
+        if (camera.gameObject.activeSelf)
+        {
+            RenderTexture targetTexture = camera.targetTexture;
+            camera.targetTexture = temporary;
+            camera.Render();
+            camera.targetTexture = targetTexture;
+        }
+
+        Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGBAHalf, false);
+        RenderTexture.active = temporary;
+        texture2D.ReadPixels(new Rect(0f, 0f, num, num2), 0, 0);
+        RenderTexture.ReleaseTemporary(temporary);
+        string dir = Path.Combine(VTResources.gameRootDirectory, "Screenshots");
+        byte[] png = texture2D.EncodeToPNG();
+        
+        Destroy(texture2D);
+        
+        File.WriteAllBytes(FlybyCameraMFDPage.GetNewScreenshotFilepath(dir), png);
     }
 
     public void ReloadWeapons()
