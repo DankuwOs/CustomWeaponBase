@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using CustomWeaponBase;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using VTOLVR.Multiplayer;
 

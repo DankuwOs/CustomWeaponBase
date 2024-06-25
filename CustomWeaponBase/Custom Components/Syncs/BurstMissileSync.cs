@@ -4,8 +4,8 @@
 public class BurstMissileSync : VTNetSyncRPCOnly
 {
     public BurstMissile burstMissile;
-    
-    protected override void OnNetInitialized()
+
+    public override void OnNetInitialized()
     {
         base.OnNetInitialized();
         if (netEntity == null)

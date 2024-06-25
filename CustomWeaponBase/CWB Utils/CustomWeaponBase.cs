@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CustomWeaponBase;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using Valve.Newtonsoft.Json;
+using VTOLAPI;
 
 public class CustomWeaponsBase : MonoBehaviour
 {
@@ -20,8 +21,6 @@ public class CustomWeaponsBase : MonoBehaviour
 
     // Something
     public static List<GameObject> DetachedObjects = new List<GameObject>();
-    
-    public GameObject FindWeaponObject;
 
     private void Start()
     {
@@ -46,36 +45,6 @@ public class CustomWeaponsBase : MonoBehaviour
             ReloadWeapons();
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.P))
-        {
-            HDRScreenshot(); // oops left this in but its there now
-        }
-
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.RightShift) && Input.GetKeyDown(KeyCode.L))
-        {
-            if (FindWeaponObject)
-                Destroy(FindWeaponObject);
-            else
-            {
-                var playersVehicle = VTOLAPI.GetPlayersVehicleGameObject();
-                if (!playersVehicle)
-                    return;
-                var wm = playersVehicle.GetComponent<WeaponManager>();
-                if (!wm)
-                    return;
-
-
-                var currentEquip = wm.currentEquip;
-                if (!currentEquip)
-                    return;
-
-                FindWeaponObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                FindWeaponObject.transform.SetParent(currentEquip.transform);
-                FindWeaponObject.transform.localPosition = Vector3.zero;
-                FindWeaponObject.transform.localScale = new Vector3(1, 10, 1);
-            }
-        }
-
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.M))
         {
             if (!CameraFollowMe.instance)
@@ -86,7 +55,7 @@ public class CustomWeaponsBase : MonoBehaviour
             Debug.Log("[CWB] LM");
             var idx = Traverse.Create(CameraFollowMe.instance).Field("idx");
             Debug.Log("idx");
-            var wm = VTOLAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
+            var wm = VTAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
             if (!wm)
                 return;
 
@@ -157,34 +126,6 @@ public class CustomWeaponsBase : MonoBehaviour
         }
     }
 
-    public void HDRScreenshot()
-    {
-        int num = 3840;
-        int num2 = num / 16 * 9;
-        RenderTexture temporary = RenderTexture.GetTemporary(num, num2, 32, RenderTextureFormat.ARGBHalf);
-        temporary.antiAliasing = 8;
-        var cameraFollowMe = CameraFollowMe.instance;
-        Camera camera = cameraFollowMe.cam;
-        if (camera.gameObject.activeSelf)
-        {
-            RenderTexture targetTexture = camera.targetTexture;
-            camera.targetTexture = temporary;
-            camera.Render();
-            camera.targetTexture = targetTexture;
-        }
-
-        Texture2D texture2D = new Texture2D(num, num2, TextureFormat.RGBAHalf, false);
-        RenderTexture.active = temporary;
-        texture2D.ReadPixels(new Rect(0f, 0f, num, num2), 0, 0);
-        RenderTexture.ReleaseTemporary(temporary);
-        string dir = Path.Combine(VTResources.gameRootDirectory, "Screenshots");
-        byte[] png = texture2D.EncodeToPNG();
-        
-        Destroy(texture2D);
-        
-        File.WriteAllBytes(FlybyCameraMFDPage.GetNewScreenshotFilepath(dir), png);
-    }
-
     public void ReloadWeapons()
     {
         if (Loadout == null)
@@ -195,7 +136,7 @@ public class CustomWeaponsBase : MonoBehaviour
         }
 
         if (!MyWeaponManager)
-            MyWeaponManager = VTOLAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
+            MyWeaponManager = VTAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
 
         if (MyWeaponManager == null)
         {
@@ -218,60 +159,11 @@ public class CustomWeaponsBase : MonoBehaviour
         {
             Debug.Log("why are the weapons null huh?!?");
         }
-
-        Main.weapons?.Clear();
-
-        Main.instance.ReloadBundles();
-    }
-
-    public Texture2D GetAircraftLivery(HPEquippable equip)
-    {
-        if (!equip)
-            return null;
         
-        var wm = equip.weaponManager;
-
-        if (wm)
-        {
-            Texture2D livery;
-                
-            livery = wm.liverySample.material.GetTexture("_Livery") as Texture2D;
-            
-            var perBiome = wm.GetComponent<PerBiomeLivery>();
-            MapGenBiome.Biomes currBiome = MapGenBiome.Biomes.Boreal;
-            if (VTMapGenerator.fetch)
-            {
-                currBiome = VTMapGenerator.fetch.biome;
-            }
-            foreach (var biome in perBiome.liveries)
-            {
-                if (biome.biome == currBiome)
-                {
-                    livery = biome.livery;
-                    break;
-                }
-            }
-
-            if (livery)
-                return livery;
-            
-            Debug.Log("Couldn't find a livery sad");
-            return null;
-        }
-        return null;
-    }
-
-    [Obsolete]
-    public static bool CompareCompat(string compat, string vehicle)
-    {
-        var compats = compat.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var s in compats)
-        {
-            if (vehicle.Contains(s))
-                return true;
-        }
-
-        return false;
+        Main.instance.ReloadPacks();
+        //Main.instance.ReloadBundles();
+        if (MyWeaponManager)
+            ReloadWeapons();
     }
 
     public static bool CompareCompatNew(object compat, string vehicle, HPEquippable equippable)
@@ -286,7 +178,7 @@ public class CustomWeaponsBase : MonoBehaviour
                 var compatVehicle = compatability.Key;
                 var compatHardpoints = compatability.Value;
                 
-                if (!vehicle.Contains(compatVehicle))
+                if (!vehicle.Contains(compatVehicle) && compatVehicle != "*")
                     continue;
 
                 equippable.allowedHardpoints = compatHardpoints;

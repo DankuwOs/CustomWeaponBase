@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using UnityEngine;
 using VTNetworking;
 
@@ -11,7 +11,7 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
 
     private Traverse toggleTraverse;
 
-    protected override void OnNetInitialized()
+    public override void OnNetInitialized()
     {
         base.OnNetInitialized();
         

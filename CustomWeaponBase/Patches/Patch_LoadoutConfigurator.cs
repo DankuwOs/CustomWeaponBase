@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CustomWeaponBase;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using Valve.Newtonsoft.Json.Linq;
 using VTOLVR.Multiplayer;
@@ -20,8 +20,8 @@ public class Patch_LoadoutConfigurator
     public static void Postfix(LoadoutConfigurator __instance)
     {
         // Most of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
-        Traverse traverse = Traverse.Create(__instance);
-        Dictionary<string, EqInfo> unlockedWeaponPrefabs = (Dictionary<string, EqInfo>)traverse.Field("unlockedWeaponPrefabs").GetValue();
+        //Traverse traverse = Traverse.Create(__instance);
+        Dictionary<string, EqInfo> unlockedWeaponPrefabs = __instance.unlockedWeaponPrefabs;
         
         foreach (var weapon in Main.weapons)
         {
@@ -29,8 +29,6 @@ public class Patch_LoadoutConfigurator
             
             var currentVehicle = PilotSaveManager.currentVehicle;
             
-            if (weapon.Value is string compatOld && !CustomWeaponsBase.CompareCompat(compatOld, currentVehicle.vehicleName))
-                continue;
             if (weapon.Value is JArray compatNew && !CustomWeaponsBase.CompareCompatNew(compatNew, currentVehicle.vehicleName, weapon.Key.Item2?.GetComponent<HPEquippable>()))
                 continue;
 
@@ -47,7 +45,6 @@ public class Patch_LoadoutConfigurator
             
             if (__instance.IsMultiplayer()) // I THINK THIS IS WHY 0/27 NEED TO TEST OH WOW IM DUMB
             {
-                
                 foreach (MissileLauncher missileLauncher in weaponPrefab.GetComponentsInChildrenImplementing<MissileLauncher>(true))
                 {
                     if (missileLauncher.loadOnStart)
@@ -60,15 +57,15 @@ public class Patch_LoadoutConfigurator
             weaponPrefab.SetActive(false); // do need?
             
             EqInfo weaponInfo = new EqInfo(weaponPrefab, $"{currentVehicle.equipsResourcePath}/{weapon.Key.Item1}");
-            
 
             unlockedWeaponPrefabs.Add(weapon.Key.Item1, weaponInfo);
             __instance.availableEquipStrings.Add(weapon.Key.Item1);
         }
-        
-        
-        traverse.Field("unlockedWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
-        traverse.Field("allWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
+
+        __instance.unlockedWeaponPrefabs = unlockedWeaponPrefabs;
+        __instance.allWeaponPrefabs = unlockedWeaponPrefabs;
+        /*traverse.Field("unlockedWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
+        traverse.Field("allWeaponPrefabs").SetValue(unlockedWeaponPrefabs);*/
     }
 
     [HarmonyPrefix]

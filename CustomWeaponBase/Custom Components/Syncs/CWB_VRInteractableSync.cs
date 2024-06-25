@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using VTNetworking;
 
 public class CWB_VRInteractableSync : VTNetSyncRPCOnly
@@ -9,7 +9,7 @@ public class CWB_VRInteractableSync : VTNetSyncRPCOnly
 
     private bool _isRightController;
 
-    protected override void OnNetInitialized()
+    public override void OnNetInitialized()
     {
         base.OnNetInitialized();
 

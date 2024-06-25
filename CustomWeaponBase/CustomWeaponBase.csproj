@@ -1,61 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7BB21F11-6675-4E25-AB78-E420A6B129C2}</ProjectGuid>
+    <TargetFramework>net472</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CustomWeaponBase</RootNamespace>
-    <AssemblyName>CustomWeaponBase</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
     <LangVersion>default</LangVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\0Harmony.dll</HintPath>
+      <HintPath>..\..\..\..\..\@Mod Loader\Managed\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp">
+    <Reference Include="Assembly-CSharp" Publicize="True">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
-    <Reference Include="ModLoader">
-      <HintPath>..\Dependencies\ModLoader.dll</HintPath>
+    <Reference Include="Mod Loader" Publicize="True">
+      <HintPath>..\..\..\..\..\@Mod Loader\Managed\Mod Loader.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization">
+    <Reference Include="ModLoader.Framework">
+      <HintPath>..\..\..\..\..\@Mod Loader\Managed\ModLoader.Framework.dll</HintPath>
+    </Reference>
+    <Reference Update="System.Runtime.Serialization">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\System.Runtime.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Reference Include="SteamQueries.Models">
+      <HintPath>..\..\..\..\..\@Mod Loader\Managed\SteamQueries.Models.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Unity.InputSystem.dll</HintPath>
     </Reference>
@@ -89,65 +62,39 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Custom Components\BurstMissile.cs" />
-    <Compile Include="Custom Components\CombinedCannon.cs" />
-    <Compile Include="Custom Components\CWBFLKMissile.cs" />
-    <Compile Include="Custom Components\CWB_HPEquipCMPod.cs" />
-    <Compile Include="Custom Components\CWB_FuelTank.cs" />
-    <Compile Include="Custom Components\CWB_HPEquipExtension.cs" />
-    <Compile Include="Custom Components\HeadTrackObject.cs" />
-    <Compile Include="Custom Components\HPEquipGunTurretCombined.cs" />
-    <Compile Include="Custom Components\LiveryMesh.cs" />
-    <Compile Include="Custom Components\MeshHider.cs" />
-    <Compile Include="Custom Components\ObjectRotator.cs" />
-    <Compile Include="Custom Components\RotaryComponent.cs" />
-    <Compile Include="Custom Components\Syncs\AnimationToggleSync.cs" />
-    <Compile Include="Custom Components\Syncs\BurstMissileSync.cs" />
-    <Compile Include="Custom Components\Syncs\CWB_GrabInteractableSync.cs" />
-    <Compile Include="Custom Components\Syncs\CWB_VRInteractableSync.cs" />
-    <Compile Include="Custom Components\Syncs\FLKMissileSync.cs" />
-    <Compile Include="Custom Components\WindingWeapon.cs" />
-    <Compile Include="Custom Components\CustomInteractableScripts\CWB_GrabInteractable.cs" />
-    <Compile Include="Custom Components\CustomInteractableScripts\CWB_HandAnimation.cs" />
-    <Compile Include="Custom Components\CustomInteractableScripts\CWB_VRIntGlovePoser.cs" />
-    <Compile Include="Custom Components\CWB_Explosion.cs" />
-    <Compile Include="Custom Components\CWB_Weapon.cs" />
-    <Compile Include="CWB Utils\FileLoader.cs" />
-    <Compile Include="CWB Utils\HandAnimatorOverride.cs" />
-    <Compile Include="Main.cs" />
-    <Compile Include="CWB Utils\CustomWeaponBase.cs" />
-    <Compile Include="Patches\Patch_AircraftLiveryApplicator.cs" />
-    <Compile Include="Patches\Patch_ArticulatingHP.cs" />
-    <Compile Include="Patches\Patch_CameraFollowMe.cs" />
-    <Compile Include="Patches\Patch_FlightSceneManager.cs" />
-    <Compile Include="Patches\Patch_HPEquipIRML.cs" />
-    <Compile Include="Patches\Patch_HPEquippable.cs" />
-    <Compile Include="Patches\Patch_LoadoutConfigurator.cs" />
-    <Compile Include="Patches\Patch_Missile.cs" />
-    <Compile Include="Patches\Patch_MissileLauncher.cs" />
-    <Compile Include="Patches\Patch_MPLobbyData.cs" />
-    <Compile Include="Patches\Patch_NetInstantiate.cs" />
-    <Compile Include="Patches\Patch_PlayerVehicle.cs" />
-    <Compile Include="Patches\Patch_PlayerVehicleSetup.cs" />
-    <Compile Include="Patches\Patch_SMSInternalWhateverTheFuck.cs" />
-    <Compile Include="Patches\Patch_VTMPScenarioSettings.cs" />
-    <Compile Include="Patches\Patch_WeaponManagerSync.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Reference Include="VTOLAPI">
+      <HintPath>..\..\..\..\..\@Mod Loader\Mods\VTOLAPI\VTOLAPI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Builds\StreamingAssets\(Template)manifest.json">
       <Link>(Template)manifest.json</Link>
     </Content>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_ModLoader\projects\My Mods\Custom Weapon Base\Builds\CustomWeaponBase.dll"
-copy "$(TargetPath)" "D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.6.1\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll"
-</PostBuildEvent>
+  <ItemGroup>
+    <PackageReference Include="Danku.BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Custom Components\CWB_BurstMissile.cs" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Mods\Custom Weapons Base\CustomWeaponBase.dll&quot;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.9.5\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll&quot;&#xA;" />
+  </Target>
 </Project>

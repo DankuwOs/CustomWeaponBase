@@ -6,8 +6,8 @@ using VTNetworking;
 public class CWB_GrabInteractableSync : VTNetSyncRPCOnly
 {
     public CWB_GrabInteractable grabInteractable;
-    
-    protected override void OnNetInitialized()
+
+    public override void OnNetInitialized()
     {
         base.OnNetInitialized();
         

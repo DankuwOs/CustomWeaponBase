@@ -1,5 +1,5 @@
 ﻿using CustomWeaponBase;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
