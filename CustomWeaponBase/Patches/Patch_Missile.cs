@@ -11,8 +11,11 @@ public class Patch_Missile
     public static bool Prefix(Missile __instance, Collider directHit, Vector3 ___explosionNormal, ref bool ___detonated, UnityAction<Missile> ___OnMissileDetonated)
     {
         var cwbExp = __instance.GetComponent<CWB_Explosion>();
-        if (!cwbExp)
+        
+        if (cwbExp == null)
+        {
             return true;
+        }
 
         // Written by hand so its legally mine.
 
