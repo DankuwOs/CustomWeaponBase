@@ -26,6 +26,12 @@ public class Patch_LoadoutConfigurator
         foreach (var weapon in Main.weapons)
         {
             Debug.Log($"[CWB]: Trying to add {weapon.Key.Item1} to configurator.");
+
+            if (unlockedWeaponPrefabs.ContainsKey(weapon.Key.Item1))
+            {
+                Debug.Log($"[CWB]: Cannot add {weapon.Key.Item1} to configurator as it already exists. '{weapon.Key.Item3}'");
+                continue;
+            }
             
             var currentVehicle = PilotSaveManager.currentVehicle;
             
@@ -84,7 +90,7 @@ public class Patch_LoadoutConfigurator
 
     private static void CreateHardpoint(int idx, LoadoutConfigurator configurator)
     {
-        if (configurator.wm.hardpointTransforms.Any(e => !e || !e.parent || e.parent.gameObject.name.Contains("CWBHB")) || NewHardpoints.Contains(idx))
+        if (configurator.wm.hardpointTransforms.Any(e => !e || !e.parent || e.parent.gameObject.name.Contains("CWBHP")) || NewHardpoints.Contains(idx))
             return;
 
         var newTransform = new GameObject($"CWBHP_{idx}").transform;
@@ -95,7 +101,7 @@ public class Patch_LoadoutConfigurator
         var tfList = configurator.wm.hardpointTransforms.ToList();
         tfList.Add(newTransform);
         configurator.wm.hardpointTransforms = tfList.ToArray();
-
+        Debug.Log($"Is nodeObj null? {Main.nodeObj == null}");
         var hpObj = Object.Instantiate(Main.nodeObj, configurator.hpNodes[0].transform.parent);
         hpObj.name = $"HardpointInfo ({idx})";
         if (VTOLMPUtils.IsMultiplayer())

@@ -13,7 +13,7 @@ public class CWB_HardpointModifier : CWB_HPEquipExtension
     public int[] detachHpIdxs;
 
     public Transform[] hardpoints;
-
+    
     
     private List<Tuple<Transform, Transform, Vector3, Quaternion>> _origHps = new ();
 
@@ -198,19 +198,6 @@ public class CWB_HardpointModifier : CWB_HPEquipExtension
     private void SetNodeEnabled(int idx, bool enable, LoadoutConfigurator configurator)
     {
         var go = configurator.hpNodes[idx].gameObject;
-        /*var renderers = go.GetComponentsInChildren<Renderer>();
-        var canvasRenderers = go.GetComponentsInChildren<CanvasRenderer>();
-        var vrInt = go.GetComponentInChildren<VRInteractable>();
-        vrInt.enabled = enable;
-        foreach (var renderer in renderers)
-        {
-            renderer.enabled = enable;
-        }
-
-        foreach (var canvasRenderer in canvasRenderers)
-        {
-            canvasRenderer.cull = enable;
-        }*/
         go.SetActive(enable);
     }
 }

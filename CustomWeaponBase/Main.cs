@@ -87,6 +87,7 @@ public class Main : VtolMod
         
         
         nodeObj = FileLoader.GetAssetBundleAsGameObject($"{ModFolder}/node.splooge", "NodeTemplate");
+        Debug.Log($"Got nodeObj {nodeObj}");
         nodeObj.SetActive(false);
         DontDestroyOnLoad(nodeObj); // Fix game crashing after leaving and going back to the place
         
@@ -104,7 +105,7 @@ public class Main : VtolMod
     {
         weapons?.Clear();
         
-        foreach (var cwbPack in cwbPacks)
+        foreach (var cwbPack in cwbPacks.ToArray())
         {
             UnloadPack(cwbPack);
         }

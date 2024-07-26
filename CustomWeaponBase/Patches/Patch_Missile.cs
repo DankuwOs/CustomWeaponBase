@@ -82,7 +82,7 @@ public class Patch_Missile
             
             cwbExp.CreateExplosionEffect(explosion, __instance.transform.position, cwbExp.useHitNormal? ___explosionNormal : sourceVelocity, scale);
         }
-        if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.instance.isCamEnabled &&
+        if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.isCamEnabled &&
             FlybyCameraMFDPage.instance.flybyCam)
         {
             float num2 = cwbExp.shake * cwbExp.shake /
