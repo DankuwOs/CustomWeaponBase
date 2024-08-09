@@ -9,7 +9,7 @@ public class HPEquipGunTurretCombined : HPEquipGunTurret
 
     private Gun _originalGun;
 
-    protected override void OnEquip()
+    public override void OnEquip()
     {
         base.OnEquip();
         

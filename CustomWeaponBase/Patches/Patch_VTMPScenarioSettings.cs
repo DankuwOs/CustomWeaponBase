@@ -1,5 +1,5 @@
 ﻿using CustomWeaponBase;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -35,10 +35,7 @@ public class Inject_GameModeSettingsMainMenu
             wmd.transform.localPosition = new Vector3(-422, -247, 0);
             wmdCheckmark = wmd.transform.Find(__instance.lateJoinsIndicator.name);
         }
-
         
-
-        Debug.Log("Try setup vrInt");
         VRInteractable vrInt = wmd.GetComponent<VRInteractable>();
         vrInt.interactableName = "Allow CWB WMDS";
         vrInt.OnInteract = new UnityEvent();

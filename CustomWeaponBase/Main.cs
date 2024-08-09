@@ -1,5 +1,3 @@
-
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,293 +5,531 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using CustomWeaponBase.CWB_Utils;
-using Harmony;
-using ModLoader;
+using HarmonyLib;
+using ModLoader.Framework;
+using ModLoader.Framework.Attributes;
+using SteamQueries.Models;
+using VTOLAPI;
 using UnityEngine;
 using Valve.Newtonsoft.Json;
 using Valve.Newtonsoft.Json.Linq;
 using VTNetworking;
 
-namespace CustomWeaponBase
+namespace CustomWeaponBase;
+
+public class CWBSettings
 {
-    public class Main : VTOLMOD
+    public class PackToLoad(string packName, bool loadPack = true)
     {
-        // Some of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
+        public string name = packName;
+        public bool loadThisPack = loadPack;
+    }
 
-        public static Dictionary<Tuple<string, GameObject>, object> weapons = new Dictionary<Tuple<string, GameObject>, object>(); // realize now than tuples can have more than two im very smart
+    public List<PackToLoad> packs;
+}
 
-        public List<string> assetBundles;
+public class CWBPack
+{
+    public struct PackEquip
+    {
+        public List<string> resourcePaths;
+        public string missileResourcePath;
+    }
+    public string name;
+    
+    public SteamItem item;
 
-        public static bool allowWMDS = true;
+    public List<PackEquip> equips;
+}
 
-        public static Main instance;
 
-        public static GameObject nodeObj;
+[ItemId("danku-cwb")]
+public class Main : VtolMod
+{
+    // Some of this code is based on Temperz87's NotBDArmory: https://github.com/Temperz87/NotBDArmory
 
-        public static int extraHps = 4;
+    /// <summary>
+    /// Tuple(Item1 = WeaponName, Item2 = WeaponObject, Item3 = FileName), Compatability
+    /// </summary>
+    public static Dictionary<Tuple<string, GameObject, string>, object> weapons = new(); // realize now that tuples can have more than two im very smart
+    
 
-        public override void ModLoaded()
+    //public List<Tuple<string, CWBPack>> assetBundles;
+
+    public List<CWBPack> cwbPacks = new();
+
+    public static bool allowWMDS = true;
+
+    public static Main instance;
+
+    public static GameObject nodeObj;
+
+    public static int extraHps = 4;
+
+    public string ModFolder;
+    
+
+    private List<SteamItem> _allItems;
+
+    private static CWBSettings CWBSettings;
+        
+    public void Start()
+    {
+        ModFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        
+        GetSettings();
+
+        GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
+        DontDestroyOnLoad(cwb);
+        instance = this;
+        
+        
+        nodeObj = FileLoader.GetAssetBundleAsGameObject($"{ModFolder}/node.splooge", "NodeTemplate");
+        Debug.Log($"Got nodeObj {nodeObj}");
+        nodeObj.SetActive(false);
+        DontDestroyOnLoad(nodeObj); // Fix game crashing after leaving and going back to the place
+        
+        VTAPI.SceneLoaded += delegate
         {
-            HarmonyInstance instance = HarmonyInstance.Create("danku.cwb");
-            instance.PatchAll(Assembly.GetExecutingAssembly());
-            
-            base.ModLoaded();
+            CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
+        };
 
-            StartCoroutine(LoadCustomBundlesAsync());
+        GetSteamItems();
+        
+        GetCWBPacks();
+    }
 
-            GameObject cwb = new GameObject("Custom Weapons Base", typeof(CustomWeaponsBase));
-            DontDestroyOnLoad(cwb);
-            Main.instance = this;
-            
-            nodeObj = FileLoader.GetAssetBundleAsGameObject($"{ModFolder}/node.splooge", "NodeTemplate");
-            
-            VTOLAPI.SceneLoaded += delegate
-            {
-                CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
-            };
+    public void ReloadPacks()
+    {
+        weapons?.Clear();
+        
+        foreach (var cwbPack in cwbPacks.ToArray())
+        {
+            UnloadPack(cwbPack);
+        }
+        
+        GetSteamItems();
+        
+        GetCWBPacks();
+    }
+
+
+    private void GetSteamItems()
+    {
+        List<SteamItem> items = new List<SteamItem>();
+        var steamItems = VTAPI.instance.FindSteamItems();
+        foreach (var steamItem in steamItems)
+        {
+            Debug.Log($"[CWB]: Found SteamItem {steamItem.Title}");
+        }
+        items.AddRange(VTAPI.instance.FindSteamItems());
+        var localItems = VTAPI.instance.FindLocalItems();
+        foreach (var localItem in localItems)
+        {
+            Debug.Log($"[CWB]: Found Local SteamItem {localItem.Title}");
+        }
+        items.AddRange(localItems);
+        
+        _allItems = items;
+    }
+
+    private void GetCWBPacks(bool ignoreSetting = false)
+    {
+        
+        Debug.Log($"[CWB]: Getting CWB mods..");
+
+        foreach (var steamItem in _allItems)
+        {
+            var files = Directory.GetFiles(steamItem.Directory, "*.cwb");
+            if (files.Length == 0)
+                continue;
+            Debug.Log($"[CWB]: Loading CWB Files from '{steamItem.Directory}'");
+            LoadPack(steamItem, !ignoreSetting);
         }
 
-        public void ReloadBundles()
+        var streamingAssetsPath = Path.Combine(ModFolder, "StreamingAssets");
+        var cwbFiles = Directory.GetFiles(streamingAssetsPath, "*.cwb");
+        foreach (var cwbFile in cwbFiles)
         {
-            var cwbWeapons = FindObjectsOfType<CWB_Weapon>(true);
-            if (cwbWeapons.Length > 0)
-                DestroyObjects(cwbWeapons);
+            Debug.Log($"[CWB]: Loading StreamingAssets CWB File '{Path.GetFileName(cwbFile)}'");
+            LoadPack(new FileInfo(cwbFile), null, !ignoreSetting);
+        }
+        
+        SaveSettings();
+    }
 
-            StartCoroutine(LoadCustomBundlesAsync());
+    public void LoadPackForName(string title, bool useSetting = true)
+    {
+        Debug.Log($"[CWB]: Trying to load pack for '{title}'");
+        var item = _allItems.Find(item => item.Title == title);
+        
+        if (item == null)
+        {
+            Debug.Log($"[CWB]: Couldn't get SteamItem for '{title}'");
+            return;
+        }
+        
+        LoadPack(item, useSetting);
+        SaveSettings();
+    }
+
+    private void LoadPack(SteamItem item, bool useSetting = false)
+    {
+        
+        if (VTAPI.instance.IsItemLoaded(item.Directory))
+            Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
+        else
+            VTAPI.instance.LoadSteamItem(item);
+
+        var files = Directory.GetFiles(item.Directory, "*.cwb");
+
+        Debug.Log($"[CWB]: Found {files.Length} cwb files in '{item.Directory}'");
+        foreach (var file in files)
+        {
+            LoadPack(new FileInfo(file), item, useSetting);
+        }
+    }
+
+    private void LoadPack(FileInfo file, SteamItem item = null, bool useSetting = false)
+    {
+
+        if (CWBSettings.packs == null)
+            throw new NullReferenceException("[CWB]: CWBSettings packs list is NULL!!!");
+        
+        if (CWBSettings.packs.All(pack => pack != null && pack.name != file.Name))
+            CWBSettings.packs.Add(new CWBSettings.PackToLoad(file.Name)); // Add a new pack to the list 
+        
+        else if (useSetting && !CWBSettings.packs.Find(pack => pack.name == file.Name).loadThisPack)
+        {
+            Debug.Log($"[CWB]: Settings file says not to load '{item?.Title + (item == null ? "" : "\\")}{file.Name}'");
+            return;
         }
 
-        private IEnumerator LoadCustomBundlesAsync() // Special thanks to https://github.com/THE-GREAT-OVERLORD-OF-ALL-CHEESE/Custom-Scenario-Assets/ for this code
+        if (cwbPacks.Any(pack => pack.name == file.Name))
         {
-            if (assetBundles != null)
-            {
-                var bundles = AssetBundle.GetAllLoadedAssetBundles();
-                bundles.DoIf(e => assetBundles.Contains(e.name),
-                    bundle => { Debug.Log($"[CWB]: assetBundles contains {bundle.name}, unloading."); bundle.Unload(true); });
-            }
-            assetBundles = new List<string>();
-            
-            DirectoryInfo info = new DirectoryInfo(Directory.GetCurrentDirectory());
-            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .nbda && .cwb custom weapons");
-            foreach (FileInfo file in info.GetFiles("*.nbda", SearchOption.AllDirectories))
-            {
-
-                Debug.Log("[CWB]: Found .nbda " + file.FullName);
-                StartCoroutine(LoadStreamedWeapons(file, true));
-            }
-            Debug.Log("[CWB]: Searching " + Directory.GetCurrentDirectory() + " for .cwb custom weapons");
-            foreach (FileInfo file in info.GetFiles("*.cwb", SearchOption.AllDirectories))
-            {
-                Debug.Log("[CWB]: Found .cwb " + file.FullName);
-                StartCoroutine(LoadStreamedWeapons(file, false));
-            }
-            
-            yield break;
+            Debug.LogError($"[CWB]: Pack {file.Name} is already loaded, skipping.");
+            return;
         }
 
-        private IEnumerator LoadStreamedWeapons(FileInfo info, bool isNBDA)
+        Debug.Log($"[CWB]: Loading CWB Pack @ '{item?.Title + (item == null ? "" : "\\")}{file.Name}'");
+        
+        var cwbPack = new CWBPack
         {
-            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(info.FullName);
-            yield return request;
+            item = item,
+            name = file.Name,
+            equips = new List<CWBPack.PackEquip>()
+        };
+        
+        cwbPacks.Add(cwbPack);
+        
+        StartCoroutine(LoadStreamedWeapons(file, cwbPack));
+    }
 
-            if (request.assetBundle && !assetBundles.Contains(request.assetBundle.name))
+    private IEnumerator LoadStreamedWeapons(FileInfo info, CWBPack pack)
+    {
+        // Might happen who knows.
+        var existingBundle = AssetBundle.GetAllLoadedAssetBundles().FirstOrDefault(bundle => bundle.name == info.Name);
+        if (existingBundle)
+        {
+            Debug.Log($"[CWB]: Unloading existing bundle '{existingBundle.name}'");
+            //assetBundles.RemoveAll(a => a.Item1 == existingBundle.name);
+            existingBundle.Unload(true);
+        }
+        
+        
+        var assetBundle = AssetBundle.LoadFromFile(info.FullName);
+        
+        Debug.Log($"[CWB]: Loaded asset bundle '{assetBundle.name}' for file '{info.Name}'");
+
+        if (assetBundle)
+        {
+            var manifest = assetBundle.LoadAsset<TextAsset>("manifest.json");
+            if (manifest == null)
             {
-                assetBundles.Add(request.assetBundle.name);
-                AssetBundleRequest requestJson = request.assetBundle.LoadAssetAsync("manifest.json");
-                yield return requestJson;
-                if (requestJson.asset == null)
+                Debug.LogError("[CWB]: Couldn't find manifest.json in " + info.Name);
+                yield break;
+            }
+            
+            JObject jManifest = JsonConvert.DeserializeObject<JObject>(manifest.text);
+            
+            if (jManifest["DevDependency"] != null)
+            {
+                string devDependency = (string)jManifest["DevDependency"];
+                if (Directory.Exists(devDependency))
                 {
-                    Debug.LogError("Couldn't find manifest.json in " + info.Name);
-                    yield break;
-                }
-
-                TextAsset manifest = requestJson.asset as TextAsset;
-                JObject jManifest = JsonConvert.DeserializeObject<JObject>(manifest.text);
-
-                #region Legacy
-
-                if (jManifest["Weapons"] == null)
-                {
-                    if (!isNBDA)
+                    Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
+                    try
                     {
-                        throw new NullReferenceException(
-                            $"{info.Name} is using an old manifest, if this pack depends on a dll please update it. FOR DEVELOPER: https://github.com/DankuwOs/CustomWeaponBase/blob/master/Builds/StreamingAssets/(Template)manifest.json");
-                    }
-
-                    Debug.Log($"[CWB]: Loading legacy .nbda: {info.Name}");
-
-                    Dictionary<string, string> jsonLines = jManifest.ToObject<Dictionary<string, string>>();
-                    foreach (var weaponName in jsonLines)
-                    {
-                        AssetBundleRequest requestGun = request.assetBundle.LoadAssetAsync(weaponName.Key + ".prefab");
-                        yield return requestGun;
-                        if (requestGun.asset == null)
+                        var steamItem = _allItems.Find(item => Path.GetFullPath(item.Directory) == Path.GetFullPath(devDependency));
+                        if (steamItem != null)
                         {
-                            Debug.LogError("[CWB]: Couldn't load asset " + weaponName.Key);
-                            continue;
-                        }
-
-                        string compat = weaponName.Value;
-
-                        GameObject weapon = requestGun.asset as GameObject;
-                        RegisterWeapon(weapon, weapon.name, compat);
-                    }
-
-                    yield break;
-                }
-
-                #endregion
-                
-                
-                if (jManifest["Dependency"] != null)
-                {
-                    string dependency = (string)jManifest["Dependency"];
-                    if (File.Exists($"{info.DirectoryName}/{dependency}"))
-                    {
-                        Debug.Log($"[CWB]: Trying to load dependency @ {dependency}");
-                        LoadAssembly($"{info.DirectoryName}/{dependency}");
-                    }
-                    else
-                    {
-                        Debug.Log($"[CWB]: Dependency empty for {info.FullName} (Empty line, not an issue.)");
-                    }
-                }
-
-                if (jManifest["DevDependency"] != null)
-                {
-                    string devDependency = (string)jManifest["DevDependency"];
-                    if (File.Exists(devDependency))
-                    {
-                        Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
-                        LoadAssembly(devDependency);
-                    }
-                    else if (!string.IsNullOrEmpty(devDependency))
-                    {
-                        Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency} (Empty line, not an issue.)");
-                    }
-                }
-
-                Dictionary<string, object> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, object>>();
-                if (jsonWeapons != null)
-                {
-                    foreach (var weapon in jsonWeapons)
-                    {
-                        GameObject requestWeapon = request.assetBundle.LoadAsset<GameObject>(weapon.Key + ".prefab");
-                        
-                        if (requestWeapon == null)
-                        {
-                            Debug.Log(
-                                $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
-                            continue;
+                            pack.item = steamItem;
+                            if (!VTAPI.instance.IsItemLoaded(steamItem.Directory))
+                                VTAPI.instance.LoadSteamItem(steamItem);
                         }
                         
-                        RegisterWeapon(requestWeapon, weapon.Key, weapon.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"[CWB]: Couldn't load dev dependency @ {devDependency}. {e}");
+                        throw;
                     }
                 }
-                request.assetBundle.Unload(false); // Don't know if the other one still works but eh
-            }
-            else
-            {
-                Debug.Log("[CWB]: Couldn't load streamed bundle " + info.FullName);
-            }
-        }
-
-
-        private void RegisterWeapon(GameObject equip, string weaponName, object compatability)
-        {
-            Debug.Log($"Registering weapon: {weaponName}");
-
-            equip.name = weaponName;
-            if (!equip.GetComponent<CWB_Weapon>())
-                equip.AddComponent<CWB_Weapon>();
-
-            DontDestroyOnLoad(equip);
-
-            foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
-            {
-                if (!source.outputAudioMixerGroup)
-                    source.outputAudioMixerGroup = VTResources.GetExteriorMixerGroup();
-            }
-
-            HPEquipMissileLauncher launcher = equip.GetComponent<HPEquipMissileLauncher>();
-
-            if (launcher)
-            {
-                switch (launcher)
+                else if (!string.IsNullOrEmpty(devDependency))
                 {
-                    case HPEquipIRML launcherIrml:
-                        launcherIrml.irml = launcherIrml.ml as IRMissileLauncher;
-                        break;
-                    case HPEquipOpticalML launcherOpticalMl:
-                        launcherOpticalMl.oml = launcherOpticalMl.ml as OpticalMissileLauncher;
-                        break;
+                    Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency} (Empty line, not an issue.)");
                 }
-
-                if (launcher.ml.missilePrefab && VTResources.Load<GameObject>(launcher.missileResourcePath) == null)
+            }
+            
+            Dictionary<string, object> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, object>>();
+            if (jsonWeapons != null)
+            {
+                foreach (var weapon in jsonWeapons)
                 {
-                    RegisterMissile(launcher.ml.missilePrefab, launcher.missileResourcePath);
+                    GameObject requestWeapon = assetBundle.LoadAsset<GameObject>(weapon.Key + ".prefab");
+
+                    if (requestWeapon == null)
+                    {
+                        Debug.Log(
+                            $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
+                        continue;
+                    }
+
+                    RegisterWeapon(requestWeapon, weapon.Key, weapon.Value, pack);
                 }
             }
 
-            var pvList = VTResources.GetPlayerVehicleList();
+            assetBundle.Unload(false); // Unload the bundle so that you can overwrite the file.
+        }
+        else
+        {
+            Debug.Log($"[CWB]: Couldn't load streamed bundle {info.FullName}");
+        }
+    }
 
-            foreach (var playerVehicle in pvList.Where(playerVehicle =>
-                     {
-                         if (compatability is string compat) // Haters (rider) wants me to make this unreadable. no.
-                         {
-                             return CustomWeaponsBase.CompareCompat(compat, playerVehicle.vehicleName);
-                         }
 
-                         if (compatability is JArray)
-                         {
-                             return CustomWeaponsBase.CompareCompatNew(compatability, playerVehicle.vehicleName,
-                                 equip.GetComponent<HPEquippable>());
-                         }
+    private void RegisterWeapon(GameObject equip, string weaponName, object compatability, CWBPack pack)
+    {
+        Debug.Log($"[CWB]: Registering weapon: {weaponName}");
+        
+        CWBPack.PackEquip thisEquip = new CWBPack.PackEquip();
+        List<string> resourcePaths = new List<string>();
 
-                         return false;
-                     }))
+        equip.name = weaponName;
+        DontDestroyOnLoad(equip);
+        
+        CWB_Weapon cwbWeapon = equip.GetComponent<CWB_Weapon>();
+        if (!cwbWeapon)
+            cwbWeapon = equip.AddComponent<CWB_Weapon>();
+        cwbWeapon.bundleName = pack.name;
+
+        foreach (AudioSource source in equip.GetComponentsInChildren<AudioSource>(true))
+        {
+            if (!source.outputAudioMixerGroup)
+                source.outputAudioMixerGroup = VTResources.GetExteriorMixerGroup();
+        }
+
+        HPEquipMissileLauncher launcher = equip.GetComponent<HPEquipMissileLauncher>();
+
+        if (launcher)
+        {
+            switch (launcher)
             {
-                VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
-                VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+                case HPEquipIRML launcherIrml:
+                    launcherIrml.irml = launcherIrml.ml as IRMissileLauncher;
+                    break;
+                
+                case HPEquipOpticalML launcherOpticalMl:
+                    launcherOpticalMl.oml = launcherOpticalMl.ml as OpticalMissileLauncher;
+                    break;
             }
 
-            weapons.Add(Tuple.Create(weaponName, equip), compatability);
+            if (launcher.ml.missilePrefab && VTResources.Load<GameObject>(launcher.missileResourcePath) == null)
+            {
+                RegisterMissile(launcher.ml.missilePrefab, launcher.missileResourcePath, pack);
+                
+                thisEquip.missileResourcePath = launcher.missileResourcePath; // Add missile resource path to remove when unloading the pack.
+            }
+        }
+        
+        var pvList = VTResources.GetPlayerVehicleList();
 
-            equip.SetActive(false);
+        bool WeaponCompat(PlayerVehicle playerVehicle) // Made this a local function since doing it in the pvList.Where is kinda ugly
+        {
+            if (compatability is JArray)
+            {
+                return CustomWeaponsBase.CompareCompatNew(compatability, playerVehicle.vehicleName, equip.GetComponent<HPEquippable>());
+            }
+            return false;
         }
 
-        public void RegisterMissile(GameObject missile, string resourcePath)
+        foreach (var playerVehicle in pvList.Where(WeaponCompat))
         {
-            missile.AddComponent<CWB_Weapon>();
-            DontDestroyOnLoad(missile);
-            VTResources.RegisterOverriddenResource(resourcePath, missile);
-            VTNetworkManager.RegisterOverrideResource(resourcePath, missile);
-            missile.SetActive(false);
+            VTResources.RegisterOverriddenResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+            VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
+            
+            resourcePaths.Add($"{playerVehicle.equipsResourcePath}/{weaponName}");
+            
         }
 
-        public void LoadAssembly(string path)
-        {
-            var file = Assembly.LoadFrom(path);
-            var source =
-                from t in file.GetTypes()
-                where t.IsSubclassOf(typeof(VTOLMOD))
-                select t;
-            if (source == null || source.Count() != 1) return;
-            var mod = source.First();
-            var go = new GameObject($"{mod.Assembly.FullName}", mod);
-            DontDestroyOnLoad(go);
+        weapons.Add(Tuple.Create(weaponName, equip, pack.name), compatability);
+        
+        equip.SetActive(false);
 
-            go.GetComponent<VTOLMOD>().ModLoaded();
-        }
-        public void DestroyObjects(CWB_Weapon[] gameObjects)
+        pack.equips ??= new List<CWBPack.PackEquip>();
+        thisEquip.resourcePaths = resourcePaths;
+        pack.equips.Add(thisEquip);
+    }
+
+    public void RegisterMissile(GameObject missile, string resourcePath, CWBPack pack)
+    {
+        var missileComponent = missile.AddComponent<CWB_Weapon>();
+        missileComponent.bundleName = pack.name;
+        VTResources.RegisterOverriddenResource(resourcePath, missile);
+        VTNetworkManager.RegisterOverrideResource(resourcePath, missile);
+        missile.SetActive(false);
+    }
+
+    public void DestroyObjects(CWB_Weapon[] gameObjects)
+    {
+        foreach (var o in gameObjects)
         {
-            foreach (var o in gameObjects)
+            try
             {
                 Debug.Log($"[CWB]: Destroying obj: {o.gameObject.name}");
+
                 var equip = o.gameObject.GetComponent<HPEquippable>();
-                if(equip && equip.isActiveAndEnabled)
+                if (equip && equip.isActiveAndEnabled)
                     equip.OnUnequip();
                 Destroy(o.gameObject);
             }
+            catch (Exception e)
+            {
+                Debug.LogError($"[CWB]: Got an error when destroying an object {e}");
+            }
         }
+    }
+    
+    public void UnloadPack(CWBPack pack, bool fromDll = false)
+    {
+        foreach (var equip in pack.equips)
+        {
+            if (equip.missileResourcePath == null && equip.resourcePaths == null)
+                Debug.LogError($"[CWB]: '{pack.name}' Contains an empty equip, whats happening?");
+            
+            if (equip.resourcePaths != null)
+            {
+                foreach (var eqPath in equip.resourcePaths)
+                {
+                    VTResources.ResetOverriddenResource(eqPath);
+                    VTNetworkManager.overriddenResources.Remove(eqPath);
+                }
+            }
+            if (equip.missileResourcePath != null)
+            {
+                VTResources.ResetOverriddenResource(equip.missileResourcePath);
+                VTNetworkManager.overriddenResources.Remove(equip.missileResourcePath);
+            }
+        }
+        if (pack.item != null && VTAPI.instance.IsItemLoaded(pack.item.Directory) && !fromDll)
+            VTAPI.instance.DisableSteamItem(pack.item); // Unload possible dll.
+
+        var weaponsToRemove = weapons.Where(weaponPack => weaponPack.Key.Item3 == pack.name);
+
+        foreach (var keyValuePair in weaponsToRemove.ToArray())
+        {
+            Debug.Log($"[CWB]: Removing '{keyValuePair.Key.Item1}' from the weapons list.");
+            Destroy(keyValuePair.Key.Item2);
+            weapons.Remove(keyValuePair.Key);
+        }
+
+        var cwbWeapons = FindObjectsOfType<CWB_Weapon>(true);
+
+        cwbWeapons.DoIf(weapon => weapon.bundleName == pack.name,
+            weapon =>
+            {
+                var equip = weapon.GetComponent<HPEquippable>();
+                if (equip && equip.isActiveAndEnabled && equip.weaponManager)
+                    equip.OnUnequip();
+                Destroy(weapon);
+            });
+        
+        
+        if (cwbPacks.Contains(pack))
+            cwbPacks.Remove(pack);
+    }
+
+    public void UnloadPackForName(string title) // Used by DLL mods to tell CWB to unload the pack(s)
+    {
+        var item = _allItems.Find(item => item.Title == title);
+        var packs = cwbPacks.ToArray().Where(pack => pack.item != null && pack.item.Directory == item.Directory);
+        
+        foreach (var cwbPack in packs)
+        {
+            UnloadPack(cwbPack, true);
+        }
+    }
+
+    public override void UnLoad()
+    {
+        SaveSettings();
+        
+        if (cwbPacks != null)
+        {
+            foreach (var cwbPack in cwbPacks.ToArray())
+            {
+                UnloadPack(cwbPack);
+            }
+        }
+
+        if (nodeObj)
+            Destroy(nodeObj);
+        
+        if (CustomWeaponsBase.instance.gameObject)
+            Destroy(CustomWeaponsBase.instance.gameObject);
+        
+    }
+
+    public void GetSettings()
+    {
+        var filePath = Path.Combine(ModFolder, "loaditems.json");
+
+        if (!File.Exists(filePath))
+            SaveSettings();
+
+        try
+        {
+
+            var contents = File.ReadAllText(Path.Combine(ModFolder, "loaditems.json"));
+            
+            if (string.IsNullOrEmpty(contents))
+            {
+                Debug.LogError($"[CWB]: Contents of loaditems.json is empty, creating an empty one.");
+                SaveSettings();
+            }
+
+            CWBSettings = JsonConvert.DeserializeObject<CWBSettings>(contents);
+            CWBSettings.packs ??= new List<CWBSettings.PackToLoad>();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[CWB]: Error when getting settings.. {e}");
+            throw;
+        }
+    }
+
+    public void SaveSettings()
+    {
+        CWBSettings ??= new CWBSettings()
+        {
+            packs = new List<CWBSettings.PackToLoad>(){}
+        };
+        
+        File.WriteAllText(Path.Combine(ModFolder, "loaditems.json"), JsonConvert.SerializeObject(CWBSettings, Formatting.Indented));
+    }
+
+    public string GetDirectoryForName(string name)
+    {
+        return _allItems.Find(item => item.Title == name).Directory;
     }
 }

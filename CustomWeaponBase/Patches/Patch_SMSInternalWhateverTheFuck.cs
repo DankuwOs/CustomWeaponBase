@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 
 
 [HarmonyPatch(typeof(SMSInternalWeaponAnimator), nameof(SMSInternalWeaponAnimator.UpdateCurrentProfile))]

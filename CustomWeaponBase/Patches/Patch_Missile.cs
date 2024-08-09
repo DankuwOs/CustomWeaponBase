@@ -1,5 +1,5 @@
 ﻿
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
 using VTOLVR.Multiplayer;
@@ -11,8 +11,11 @@ public class Patch_Missile
     public static bool Prefix(Missile __instance, Collider directHit, Vector3 ___explosionNormal, ref bool ___detonated, UnityAction<Missile> ___OnMissileDetonated)
     {
         var cwbExp = __instance.GetComponent<CWB_Explosion>();
-        if (!cwbExp)
+        
+        if (cwbExp == null)
+        {
             return true;
+        }
 
         // Written by hand so its legally mine.
 
@@ -82,7 +85,7 @@ public class Patch_Missile
             
             cwbExp.CreateExplosionEffect(explosion, __instance.transform.position, cwbExp.useHitNormal? ___explosionNormal : sourceVelocity, scale);
         }
-        if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.instance.isCamEnabled &&
+        if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.isCamEnabled &&
             FlybyCameraMFDPage.instance.flybyCam)
         {
             float num2 = cwbExp.shake * cwbExp.shake /

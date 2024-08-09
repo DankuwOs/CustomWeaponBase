@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using UnityEngine;
 
 [HarmonyPatch(typeof(AircraftLiveryApplicator), nameof(AircraftLiveryApplicator.ApplyLivery))]

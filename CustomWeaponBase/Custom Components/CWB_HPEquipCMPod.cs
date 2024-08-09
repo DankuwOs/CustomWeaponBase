@@ -12,7 +12,7 @@ public class CWB_HPEquipCMPod : HPEquippable, IMassObject
 
     private CountermeasureManager _countermeasureManager;
 
-    protected override void OnEquip()
+    public override void OnEquip()
     {
         base.OnEquip();
         

@@ -11,7 +11,6 @@ public class BurstMissile : Missile
 
     private bool _busted;
 
-    // Fix something I spose
     public override void BPU_FixedUpdate()
     {
         base.BPU_FixedUpdate();

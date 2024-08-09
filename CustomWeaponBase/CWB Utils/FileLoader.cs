@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using HarmonyLib;
 using UnityEngine;
 
 namespace CustomWeaponBase.CWB_Utils
@@ -13,6 +15,11 @@ namespace CustomWeaponBase.CWB_Utils
 
         public static GameObject GetAssetBundleAsGameObject(string path, string name)
         {
+            // Fixes nullref whenever reloading the mod since the bundle was still loaded.
+            var loadedBundles = AssetBundle.GetAllLoadedAssetBundles();
+            var fileName = Path.GetFileName(path);
+            loadedBundles.DoIf(bundle => bundle.name == fileName, bundle => bundle.Unload(true));
+            
             if (assetBundles.ContainsKey(path))
             {
                 try
@@ -51,6 +58,7 @@ namespace CustomWeaponBase.CWB_Utils
             {
                 var temp = bundle.LoadAsset(name, typeof(GameObject));
                 Debug.Log("AssetBundleLoader: Success.");
+                
                 return (GameObject) temp;
             }
             catch (Exception e)

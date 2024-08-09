@@ -4,8 +4,8 @@
 public class FLKMissileSync : VTNetSyncRPCOnly
 {
     public CWBFLKMissile flkMissile;
-    
-    protected override void OnNetInitialized()
+
+    public override void OnNetInitialized()
     {
         base.OnNetInitialized();
         if (netEntity == null)

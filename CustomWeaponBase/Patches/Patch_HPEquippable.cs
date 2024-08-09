@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
 [HarmonyPatch(typeof(HPEquippable))]
@@ -323,15 +324,27 @@ public class Patch_HPEquippable_UpdateWeaponType
 [HarmonyPatch(typeof(HPEquippable))]
 [HarmonyPatch(nameof(HPEquippable.ApplyLivery))]
 public class Patch_HPEquippable_ApplyLivery
-{ 
+{
+    [HarmonyPrefix]
+    public static void Prefix(HPEquippable __instance)
+    {
+        if (__instance.matchLiveries.Any(l => l == null))
+        {
+            Debug.LogError($"[CWB]: The HPEquippable on '{__instance}' has a null / empty mesh renderer in the Match Liveries list!");
+        }
+    }
+    
     [HarmonyPostfix]
     public static void ApplyLivery(HPEquippable __instance, WeaponManager wm)
     {
         if (!__instance)
             return;
         
+        
         CustomWeaponsBase.ApplyLivery(__instance, wm);
     }
 }
+
+
 
 
