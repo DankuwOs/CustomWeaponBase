@@ -6,11 +6,9 @@ using System.Linq;
 using System.Reflection;
 using CustomWeaponBase.CWB_Utils;
 using HarmonyLib;
-using ModLoader;
 using ModLoader.Framework;
 using ModLoader.Framework.Attributes;
 using SteamQueries.Models;
-using Steamworks.Ugc;
 using VTOLAPI;
 using UnityEngine;
 using Valve.Newtonsoft.Json;
@@ -125,7 +123,7 @@ public class Main : VtolMod
             Debug.Log($"[CWB]: Found SteamItem {steamItem.Title}");
         }
         items.AddRange(VTAPI.instance.FindSteamItems());
-        var localItems = ModLoader.ModLoader.Instance.FindLocalItems();
+        var localItems = VTAPI.instance.FindLocalItems();
         foreach (var localItem in localItems)
         {
             Debug.Log($"[CWB]: Found Local SteamItem {localItem.Title}");
@@ -178,10 +176,10 @@ public class Main : VtolMod
     private void LoadPack(SteamItem item, bool useSetting = false)
     {
         
-        if (ModLoader.ModLoader.Instance.IsItemLoaded(item.Directory))
+        if (VTAPI.instance.IsItemLoaded(item.Directory))
             Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
         else
-            ModLoader.ModLoader.Instance.LoadSteamItem(item);
+            VTAPI.instance.LoadSteamItem(item);
 
         var files = Directory.GetFiles(item.Directory, "*.cwb");
 
@@ -266,8 +264,8 @@ public class Main : VtolMod
                         if (steamItem != null)
                         {
                             pack.item = steamItem;
-                            if (!ModLoader.ModLoader.Instance.IsItemLoaded(steamItem.Directory))
-                                ModLoader.ModLoader.Instance.LoadSteamItem(steamItem);
+                            if (!VTAPI.instance.IsItemLoaded(steamItem.Directory))
+                                VTAPI.instance.LoadSteamItem(steamItem);
                         }
                         
                     }
@@ -433,8 +431,8 @@ public class Main : VtolMod
                 VTNetworkManager.overriddenResources.Remove(equip.missileResourcePath);
             }
         }
-        if (pack.item != null && ModLoader.ModLoader.Instance.IsItemLoaded(pack.item.Directory) && !fromDll)
-            ModLoader.ModLoader.Instance.DisableSteamItem(pack.item); // Unload possible dll.
+        if (pack.item != null && VTAPI.instance.IsItemLoaded(pack.item.Directory) && !fromDll)
+            VTAPI.instance.DisableSteamItem(pack.item); // Unload possible dll.
 
         var weaponsToRemove = weapons.Where(weaponPack => weaponPack.Key.Item3 == pack.name);
 

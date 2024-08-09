@@ -52,21 +52,17 @@ public class CustomWeaponsBase : MonoBehaviour
                 Debug.Log("[CWB] Didn't find CameraFollowMe instance.");
             }
 
-            Debug.Log("[CWB] LM");
             var idx = Traverse.Create(CameraFollowMe.instance).Field("idx");
-            Debug.Log("idx");
+            
             var wm = VTAPI.GetPlayersVehicleGameObject().GetComponent<WeaponManager>();
             if (!wm)
                 return;
 
-            Debug.Log("wm");
             var lastMissile = wm.lastFiredMissile;
-            Debug.Log($"last missile: {lastMissile}");
 
             int lastMissileIdx = 0;
             if (CameraFollowMe.instance.targets.Contains(lastMissile.actor))
             {
-                Debug.Log("contains lm");
                 lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
             }
             else
@@ -75,11 +71,9 @@ public class CustomWeaponsBase : MonoBehaviour
                 lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
             }
 
-            Debug.Log($"last missile idx: {lastMissileIdx}");
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log("finM");
         }
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.N))
@@ -91,9 +85,7 @@ public class CustomWeaponsBase : MonoBehaviour
 
             var instance = Traverse.Create(CameraFollowMe.instance);
 
-            Debug.Log("[CWB] LM");
             var idx = instance.Field("idx");
-            Debug.Log($"idx {idx.GetValue()}");
 
 
             var wm = ((Transform)instance.Field("currentTarget").GetValue()).GetComponent<WeaponManager>();
@@ -101,14 +93,11 @@ public class CustomWeaponsBase : MonoBehaviour
             if (!wm)
                 return;
 
-            Debug.Log("wm");
             var lastMissile = wm.lastFiredMissile;
-            Debug.Log($"last missile: {lastMissile}");
 
             int lastMissileIdx = 0;
             if (CameraFollowMe.instance.targets.Contains(lastMissile.actor))
             {
-                Debug.Log("contains lm");
                 lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
             }
             else
@@ -116,12 +105,9 @@ public class CustomWeaponsBase : MonoBehaviour
                 CameraFollowMe.instance.AddTarget(lastMissile.actor);
                 lastMissileIdx = CameraFollowMe.instance.targets.IndexOf(lastMissile.actor);
             }
-
-            Debug.Log($"last missile idx: {lastMissileIdx}");
             CameraFollowMe.instance.SetTargetDebug(false);
             idx.SetValue(lastMissileIdx);
             CameraFollowMe.instance.SetTargetDebug(true);
-            Debug.Log("finN");
 
         }
     }

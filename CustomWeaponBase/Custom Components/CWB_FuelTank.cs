@@ -11,7 +11,6 @@ public class CWB_FuelTank : CWB_HPEquipExtension
     public override void OnEquip()
     {
         base.OnEquip();
-        Debug.Log($"[CWB_FuelTank]: OnEquip");
         if (!_addedFuel)
         {
             hpEquip.weaponManager.GetComponent<FuelTank>().maxFuel += fuelCapacity;
@@ -22,7 +21,6 @@ public class CWB_FuelTank : CWB_HPEquipExtension
     public override void OnConfigAttach(LoadoutConfigurator configurator)
     {
         base.OnConfigAttach(configurator);
-        Debug.Log($"[CWB_FuelTank]: OnConfigAttach");
         if (!_addedFuel)
         {
             float num;
@@ -47,7 +45,6 @@ public class CWB_FuelTank : CWB_HPEquipExtension
     public override void OnConfigDetach(LoadoutConfigurator configurator)
     {
         base.OnConfigDetach(configurator);
-        Debug.Log($"[CWB_FuelTank]: OnConfigDetach");
         if (_addedFuel)
         {
             float num;
@@ -72,7 +69,6 @@ public class CWB_FuelTank : CWB_HPEquipExtension
     public override void OnUnequip()
     {
         base.OnUnequip();
-        Debug.Log($"[CWB_FuelTank]: OnUnequip");
         if (_addedFuel)
         {
             hpEquip.weaponManager.GetComponent<FuelTank>().maxFuel -= fuelCapacity;

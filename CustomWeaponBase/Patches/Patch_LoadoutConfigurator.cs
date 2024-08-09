@@ -101,7 +101,6 @@ public class Patch_LoadoutConfigurator
         var tfList = configurator.wm.hardpointTransforms.ToList();
         tfList.Add(newTransform);
         configurator.wm.hardpointTransforms = tfList.ToArray();
-        Debug.Log($"Is nodeObj null? {Main.nodeObj == null}");
         var hpObj = Object.Instantiate(Main.nodeObj, configurator.hpNodes[0].transform.parent);
         hpObj.name = $"HardpointInfo ({idx})";
         if (VTOLMPUtils.IsMultiplayer())
