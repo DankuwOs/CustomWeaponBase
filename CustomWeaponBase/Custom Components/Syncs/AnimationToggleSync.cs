@@ -9,8 +9,6 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
 
     private bool _lastDeployed;
 
-    private Traverse toggleTraverse;
-
     public override void OnNetInitialized()
     {
         base.OnNetInitialized();
@@ -23,9 +21,7 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
             Toggle = GetComponentInChildren<AnimationToggle>();
         }
         
-        toggleTraverse = Traverse.Create(Toggle);
-        
-        _lastDeployed = (bool)toggleTraverse.Field("deployed").GetValue();
+        _lastDeployed = Toggle.deployed;
     }
 
     private void FixedUpdate()
@@ -33,12 +29,12 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
         if (!isMine)
             return;
 
-        bool deployed = (bool)toggleTraverse.Field("deployed").GetValue();
-        if (deployed != _lastDeployed)
-        {
-            _lastDeployed = deployed;
-            SendRPC("AnimationToggleSyncToggle", _lastDeployed ? 1 : 0);
-        }
+        var deployed = Toggle.deployed;
+        
+        if (deployed == _lastDeployed) return;
+        
+        _lastDeployed = deployed;
+        SendRPC("AnimationToggleSyncToggle", _lastDeployed ? 1 : 0);
     }
 
     [VTRPC]
@@ -47,12 +43,11 @@ public class AnimationToggleSync : VTNetSyncRPCOnly
         if (isMine)
             return;
 
-        bool toggled = toggle == 1;
+        var toggled = toggle == 1;
+
+        if (toggled == Toggle.deployed) return;
         
-        if (toggled != (bool)toggleTraverse.Field("deployed").GetValue())
-        {
-            _lastDeployed = toggled;
-            Toggle.Toggle();
-        }
+        _lastDeployed = toggled;
+        Toggle.Toggle();
     }
 }
