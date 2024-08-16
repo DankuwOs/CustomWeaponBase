@@ -117,13 +117,13 @@ public class Main : VtolMod
     private void GetSteamItems()
     {
         List<SteamItem> items = new List<SteamItem>();
-        var steamItems = VTAPI.instance.FindSteamItems();
+        var steamItems = VTAPI.FindSteamItems();
         foreach (var steamItem in steamItems)
         {
             Debug.Log($"[CWB]: Found SteamItem {steamItem.Title}");
         }
-        items.AddRange(VTAPI.instance.FindSteamItems());
-        var localItems = VTAPI.instance.FindLocalItems();
+        items.AddRange(VTAPI.FindSteamItems());
+        var localItems = VTAPI.FindLocalItems();
         foreach (var localItem in localItems)
         {
             Debug.Log($"[CWB]: Found Local SteamItem {localItem.Title}");
@@ -148,11 +148,14 @@ public class Main : VtolMod
         }
 
         var streamingAssetsPath = Path.Combine(ModFolder, "StreamingAssets");
-        var cwbFiles = Directory.GetFiles(streamingAssetsPath, "*.cwb");
-        foreach (var cwbFile in cwbFiles)
+        if (Directory.Exists(streamingAssetsPath))
         {
-            Debug.Log($"[CWB]: Loading StreamingAssets CWB File '{Path.GetFileName(cwbFile)}'");
-            LoadPack(new FileInfo(cwbFile), null, !ignoreSetting);
+            var cwbFiles = Directory.GetFiles(streamingAssetsPath, "*.cwb");
+            foreach (var cwbFile in cwbFiles)
+            {
+                Debug.Log($"[CWB]: Loading StreamingAssets CWB File '{Path.GetFileName(cwbFile)}'");
+                LoadPack(new FileInfo(cwbFile), null, !ignoreSetting);
+            }
         }
         
         SaveSettings();
@@ -176,10 +179,10 @@ public class Main : VtolMod
     private void LoadPack(SteamItem item, bool useSetting = false)
     {
         
-        if (VTAPI.instance.IsItemLoaded(item.Directory))
+        if (VTAPI.IsItemLoaded(item.Directory))
             Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
         else
-            VTAPI.instance.LoadSteamItem(item);
+            VTAPI.LoadSteamItem(item);
 
         var files = Directory.GetFiles(item.Directory, "*.cwb");
 
@@ -264,8 +267,8 @@ public class Main : VtolMod
                         if (steamItem != null)
                         {
                             pack.item = steamItem;
-                            if (!VTAPI.instance.IsItemLoaded(steamItem.Directory))
-                                VTAPI.instance.LoadSteamItem(steamItem);
+                            if (!VTAPI.IsItemLoaded(steamItem.Directory))
+                                VTAPI.LoadSteamItem(steamItem);
                         }
                         
                     }
@@ -431,8 +434,8 @@ public class Main : VtolMod
                 VTNetworkManager.overriddenResources.Remove(equip.missileResourcePath);
             }
         }
-        if (pack.item != null && VTAPI.instance.IsItemLoaded(pack.item.Directory) && !fromDll)
-            VTAPI.instance.DisableSteamItem(pack.item); // Unload possible dll.
+        if (pack.item != null && VTAPI.IsItemLoaded(pack.item.Directory) && !fromDll)
+            VTAPI.DisableSteamItem(pack.item); // Unload possible dll.
 
         var weaponsToRemove = weapons.Where(weaponPack => weaponPack.Key.Item3 == pack.name);
 

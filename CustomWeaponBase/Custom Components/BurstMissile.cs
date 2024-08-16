@@ -15,7 +15,9 @@ public class BurstMissile : Missile
     {
         base.BPU_FixedUpdate();
         
-        if (lastTargetDistance > distance || _busted)
+        
+        
+        if (Vector3.Distance(transform.position, estTargetPos) > distance || _busted)
         {
             return;
         }
