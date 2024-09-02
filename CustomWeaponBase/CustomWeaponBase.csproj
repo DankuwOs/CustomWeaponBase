@@ -68,6 +68,9 @@
     <Reference Include="VTOLAPI">
       <HintPath>..\..\..\..\..\@Mod Loader\Mods\VTOLAPI\VTOLAPI.dll</HintPath>
     </Reference>
+    <Reference Include="VTOLTaskProgressUI">
+      <HintPath>..\..\..\..\..\..\..\workshop\content\3018410\3311107928\VTOLTaskProgressUI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\Builds\StreamingAssets\(Template)manifest.json">

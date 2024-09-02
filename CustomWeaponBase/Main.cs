@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using CheeseMods.VTOLTaskProgressUI;
 using CustomWeaponBase.CWB_Utils;
 using HarmonyLib;
 using ModLoader.Framework;
@@ -72,6 +73,8 @@ public class Main : VtolMod
     private List<SteamItem> _allItems;
 
     private static CWBSettings CWBSettings;
+
+    private Coroutine _loadPacksRoutine;
         
     public void Start()
     {
@@ -95,13 +98,25 @@ public class Main : VtolMod
         };
 
         GetSteamItems();
-        
-        GetCWBPacks();
+
+        if (_loadPacksRoutine != null)
+        {
+            StopCoroutine(_loadPacksRoutine);
+            ReloadPacks();
+        }
+        else 
+            _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
 
     public void ReloadPacks()
     {
+        if (_loadPacksRoutine != null)
+        {
+            StopCoroutine(_loadPacksRoutine);
+        }
+        
         weapons?.Clear();
+        
         
         foreach (var cwbPack in cwbPacks.ToArray())
         {
@@ -110,7 +125,7 @@ public class Main : VtolMod
         
         GetSteamItems();
         
-        GetCWBPacks();
+        _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
 
 
@@ -133,29 +148,18 @@ public class Main : VtolMod
         _allItems = items;
     }
 
-    private void GetCWBPacks(bool ignoreSetting = false)
+    private IEnumerator GetCWBPacksRoutine(bool ignoreSetting = false)
     {
-        
         Debug.Log($"[CWB]: Getting CWB mods..");
-
         foreach (var steamItem in _allItems)
         {
             var files = Directory.GetFiles(steamItem.Directory, "*.cwb");
             if (files.Length == 0)
                 continue;
+            
             Debug.Log($"[CWB]: Loading CWB Files from '{steamItem.Directory}'");
-            LoadPack(steamItem, !ignoreSetting);
-        }
-
-        var streamingAssetsPath = Path.Combine(ModFolder, "StreamingAssets");
-        if (Directory.Exists(streamingAssetsPath))
-        {
-            var cwbFiles = Directory.GetFiles(streamingAssetsPath, "*.cwb");
-            foreach (var cwbFile in cwbFiles)
-            {
-                Debug.Log($"[CWB]: Loading StreamingAssets CWB File '{Path.GetFileName(cwbFile)}'");
-                LoadPack(new FileInfo(cwbFile), null, !ignoreSetting);
-            }
+            
+            yield return StartCoroutine(LoadPackRoutine(steamItem, !ignoreSetting));
         }
         
         SaveSettings();
@@ -172,32 +176,36 @@ public class Main : VtolMod
             return;
         }
         
-        LoadPack(item, useSetting);
+        StartCoroutine(LoadPackRoutine(item, useSetting));
         SaveSettings();
     }
 
-    private void LoadPack(SteamItem item, bool useSetting = false)
+    private IEnumerator LoadPackRoutine(SteamItem item, bool useSetting = false)
     {
-        
         if (VTAPI.IsItemLoaded(item.Directory))
             Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
         else
-            VTAPI.LoadSteamItem(item);
+        {
+            if (!string.IsNullOrWhiteSpace(item.MetaData.DllName))
+                VTAPI.LoadSteamItem(item);
+        }
 
         var files = Directory.GetFiles(item.Directory, "*.cwb");
 
         Debug.Log($"[CWB]: Found {files.Length} cwb files in '{item.Directory}'");
         foreach (var file in files)
         {
-            LoadPack(new FileInfo(file), item, useSetting);
+            yield return StartCoroutine(LoadPackRoutine(new FileInfo(file), item, useSetting));
         }
     }
 
-    private void LoadPack(FileInfo file, SteamItem item = null, bool useSetting = false)
+    private IEnumerator LoadPackRoutine(FileInfo file, SteamItem item = null, bool useSetting = false)
     {
-
         if (CWBSettings.packs == null)
-            throw new NullReferenceException("[CWB]: CWBSettings packs list is NULL!!!");
+        {
+            Debug.LogError($"[CWB]: CWBSettings.packs is null!!!!");
+            yield break;
+        }
         
         if (CWBSettings.packs.All(pack => pack != null && pack.name != file.Name))
             CWBSettings.packs.Add(new CWBSettings.PackToLoad(file.Name)); // Add a new pack to the list 
@@ -205,13 +213,13 @@ public class Main : VtolMod
         else if (useSetting && !CWBSettings.packs.Find(pack => pack.name == file.Name).loadThisPack)
         {
             Debug.Log($"[CWB]: Settings file says not to load '{item?.Title + (item == null ? "" : "\\")}{file.Name}'");
-            return;
+            yield break;
         }
 
         if (cwbPacks.Any(pack => pack.name == file.Name))
         {
             Debug.LogError($"[CWB]: Pack {file.Name} is already loaded, skipping.");
-            return;
+            yield break;
         }
 
         Debug.Log($"[CWB]: Loading CWB Pack @ '{item?.Title + (item == null ? "" : "\\")}{file.Name}'");
@@ -230,6 +238,7 @@ public class Main : VtolMod
 
     private IEnumerator LoadStreamedWeapons(FileInfo info, CWBPack pack)
     {
+        var loadTask = VTOLTaskProgressManager.RegisterTask(this, $"Load {pack.name}", $"Custom Weapons Base");
         // Might happen who knows.
         var existingBundle = AssetBundle.GetAllLoadedAssetBundles().FirstOrDefault(bundle => bundle.name == info.Name);
         if (existingBundle)
@@ -239,17 +248,25 @@ public class Main : VtolMod
             existingBundle.Unload(true);
         }
         
+        loadTask.SetStatus("Loading asset bundle");
+        var assetBundleRequest = AssetBundle.LoadFromFileAsync(info.FullName);
+        yield return assetBundleRequest;
         
-        var assetBundle = AssetBundle.LoadFromFile(info.FullName);
+        var assetBundle = assetBundleRequest.assetBundle;
         
         Debug.Log($"[CWB]: Loaded asset bundle '{assetBundle.name}' for file '{info.Name}'");
 
         if (assetBundle)
         {
-            var manifest = assetBundle.LoadAsset<TextAsset>("manifest.json");
+            loadTask.SetStatus("Loading manifest");
+            var manifestRequest = assetBundle.LoadAssetAsync<TextAsset>("manifest.json");
+            yield return manifestRequest;
+            
+            var manifest = manifestRequest.asset as TextAsset;
             if (manifest == null)
             {
                 Debug.LogError("[CWB]: Couldn't find manifest.json in " + info.Name);
+                loadTask.FinishTask($"FAILED: No manifest.json!");
                 yield break;
             }
             
@@ -283,22 +300,27 @@ public class Main : VtolMod
                     Debug.Log($"[CWB]: Couldn't find dev dependency @ {devDependency} (Empty line, not an issue.)");
                 }
             }
-            
             Dictionary<string, object> jsonWeapons = jManifest["Weapons"]?.ToObject<Dictionary<string, object>>();
             if (jsonWeapons != null)
             {
+                int idx = 0;
+                loadTask.SetStatus($"Loading {jsonWeapons.Count} equips...");
                 foreach (var weapon in jsonWeapons)
                 {
-                    GameObject requestWeapon = assetBundle.LoadAsset<GameObject>(weapon.Key + ".prefab");
+                    var weaponRequest = assetBundle.LoadAssetAsync<GameObject>(weapon.Key + ".prefab");
+                    yield return weaponRequest;
+                    
+                    GameObject weaponAsset = weaponRequest.asset as GameObject;
 
-                    if (requestWeapon == null)
+                    if (weaponAsset == null)
                     {
                         Debug.Log(
                             $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
                         continue;
                     }
-
-                    RegisterWeapon(requestWeapon, weapon.Key, weapon.Value, pack);
+                    
+                    RegisterWeapon(weaponAsset, weapon.Key, weapon.Value, pack);
+                    loadTask.SetProgress((float)idx++ / jsonWeapons.Count);
                 }
             }
 
@@ -308,6 +330,8 @@ public class Main : VtolMod
         {
             Debug.Log($"[CWB]: Couldn't load streamed bundle {info.FullName}");
         }
+        
+        loadTask.FinishTask();
     }
 
 
