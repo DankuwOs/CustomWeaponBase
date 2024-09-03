@@ -85,6 +85,12 @@ public class Patch_Missile
             
             cwbExp.CreateExplosionEffect(explosion, __instance.transform.position, cwbExp.useHitNormal? ___explosionNormal : sourceVelocity, scale);
         }
+
+        if (__instance.isLocal)
+        {
+            ExplosionManager.instance.CreateDamageExplosion(__instance.transform.position, __instance.explodeRadius, __instance.explodeDamage, __instance.actor, sourceVelocity, directHit, __instance.debugExplosion, __instance.sourcePlayer, __instance.weaponEntityID);
+        }
+        
         if (FlybyCameraMFDPage.instance && FlybyCameraMFDPage.isCamEnabled &&
             FlybyCameraMFDPage.instance.flybyCam)
         {

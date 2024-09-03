@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using CheeseMods.VTOLTaskProgressUI;
 using CustomWeaponBase.CWB_Utils;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using ModLoader.Framework;
 using ModLoader.Framework.Attributes;
@@ -187,7 +188,14 @@ public class Main : VtolMod
         else
         {
             if (!string.IsNullOrWhiteSpace(item.MetaData.DllName))
-                VTAPI.LoadSteamItem(item);
+            {
+                var uniTask = VTAPI.TryLoadSteamItem(item);
+                yield return uniTask.ToCoroutine();
+                if (!uniTask.GetAwaiter().GetResult())
+                {
+                    Debug.LogError($"[CWB]: Something failed when loading '{item.Title}'");
+                }
+            }
         }
 
         var files = Directory.GetFiles(item.Directory, "*.cwb");
@@ -239,7 +247,6 @@ public class Main : VtolMod
     private IEnumerator LoadStreamedWeapons(FileInfo info, CWBPack pack)
     {
         var loadTask = VTOLTaskProgressManager.RegisterTask(this, $"Load {pack.name}", $"Custom Weapons Base");
-        // Might happen who knows.
         var existingBundle = AssetBundle.GetAllLoadedAssetBundles().FirstOrDefault(bundle => bundle.name == info.Name);
         if (existingBundle)
         {
@@ -249,15 +256,16 @@ public class Main : VtolMod
         }
         
         loadTask.SetStatus("Loading asset bundle");
+        Debug.Log($"[CWB]: Loading bundle '{info.FullName}'");
+        
         var assetBundleRequest = AssetBundle.LoadFromFileAsync(info.FullName);
         yield return assetBundleRequest;
         
         var assetBundle = assetBundleRequest.assetBundle;
-        
-        Debug.Log($"[CWB]: Loaded asset bundle '{assetBundle.name}' for file '{info.Name}'");
 
         if (assetBundle)
         {
+            Debug.Log($"[CWB]: Loaded asset bundle '{assetBundle.name}' for file '{info.Name}'");
             loadTask.SetStatus("Loading manifest");
             var manifestRequest = assetBundle.LoadAssetAsync<TextAsset>("manifest.json");
             yield return manifestRequest;
@@ -325,13 +333,14 @@ public class Main : VtolMod
             }
 
             assetBundle.Unload(false); // Unload the bundle so that you can overwrite the file.
+            loadTask.FinishTask();
         }
         else
         {
             Debug.Log($"[CWB]: Couldn't load streamed bundle {info.FullName}");
+            loadTask.FinishTask($"Failed to load...");
         }
         
-        loadTask.FinishTask();
     }
 
 

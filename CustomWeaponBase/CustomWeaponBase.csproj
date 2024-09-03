@@ -17,6 +17,9 @@
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
+    <Reference Include="Mod Loader">
+      <HintPath>..\..\..\..\..\@Mod Loader\Managed\Mod Loader.dll</HintPath>
+    </Reference>
     <Reference Include="ModLoader.Framework">
       <HintPath>..\..\..\..\..\@Mod Loader\Managed\ModLoader.Framework.dll</HintPath>
     </Reference>
