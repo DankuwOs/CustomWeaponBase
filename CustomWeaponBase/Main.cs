@@ -28,6 +28,13 @@ public class CWBSettings
     }
 
     public List<PackToLoad> packs;
+
+    public bool WillLoadPack(string name)
+    {
+        var willLoad = packs.Any(p => p.name == name && p.loadThisPack) || packs.All(p => p.name != name);
+        //Debug.Log($"[CWB]: '{name}' will {(willLoad ? "" : "not")} be loaded");
+        return willLoad;
+    }
 }
 
 public class CWBPack
@@ -183,27 +190,37 @@ public class Main : VtolMod
 
     private IEnumerator LoadPackRoutine(SteamItem item, bool useSetting = false)
     {
-        if (VTAPI.IsItemLoaded(item.Directory))
-            Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
-        else
+        var filePaths = Directory.GetFiles(item.Directory, "*.cwb");
+        var files = filePaths.Select(f => new FileInfo(f)).ToList();
+        
+        // Makes it only load the dll if any of the packs inside will be loaded.
+        if (files.Any(f => CWBSettings.WillLoadPack(f.Name)))
         {
-            if (!string.IsNullOrWhiteSpace(item.MetaData.DllName))
+            if (VTAPI.IsItemLoaded(item.Directory))
+                Debug.Log($"[CWB]: '{item.Title}' Is already loaded, ignoring dll.");
+            else
             {
-                var uniTask = VTAPI.TryLoadSteamItem(item);
-                yield return uniTask.ToCoroutine();
-                if (!uniTask.GetAwaiter().GetResult())
+                if (!string.IsNullOrWhiteSpace(item.MetaData.DllName))
                 {
-                    Debug.LogError($"[CWB]: Something failed when loading '{item.Title}'");
+                    var uniTask = VTAPI.TryLoadSteamItem(item);
+                    yield return uniTask.ToCoroutine();
+                    if (!uniTask.GetAwaiter().GetResult())
+                    {
+                        Debug.LogError($"[CWB]: Something failed when loading '{item.Title}'");
+                    }
                 }
             }
         }
+        else
+        {
+            Debug.Log($"[CWB]: '{item.Title}' disabled, not loading.");
+            yield break;
+        }
 
-        var files = Directory.GetFiles(item.Directory, "*.cwb");
-
-        Debug.Log($"[CWB]: Found {files.Length} cwb files in '{item.Directory}'");
+        Debug.Log($"[CWB]: Found {files.Count} cwb files in '{item.Directory}'");
         foreach (var file in files)
         {
-            yield return StartCoroutine(LoadPackRoutine(new FileInfo(file), item, useSetting));
+            yield return StartCoroutine(LoadPackRoutine(file, item, useSetting));
         }
     }
 
@@ -218,9 +235,9 @@ public class Main : VtolMod
         if (CWBSettings.packs.All(pack => pack != null && pack.name != file.Name))
             CWBSettings.packs.Add(new CWBSettings.PackToLoad(file.Name)); // Add a new pack to the list 
         
-        else if (useSetting && !CWBSettings.packs.Find(pack => pack.name == file.Name).loadThisPack)
+        else if (useSetting && !CWBSettings.WillLoadPack(file.Name))
         {
-            Debug.Log($"[CWB]: Settings file says not to load '{item?.Title + (item == null ? "" : "\\")}{file.Name}'");
+            Debug.Log($"[CWB]: '{item?.Title + (item == null ? "" : "\\")}{file.Name}' disabled, not loading.");
             yield break;
         }
 
@@ -420,6 +437,35 @@ public class Main : VtolMod
     public void RegisterMissile(GameObject missile, string resourcePath, CWBPack pack)
     {
         var missileComponent = missile.AddComponent<CWB_Weapon>();
+        
+        // TargetIdentityManager spits out shit if theres not an identity for a missile.
+        var missileUnitID = missile.GetComponent<UnitIDIdentifier>();
+        if (!missileUnitID)
+        {
+            missileUnitID = missile.AddComponent<UnitIDIdentifier>();
+            missileUnitID.targetName = missile.name;
+            missileUnitID.unitID = missile.name;
+            missileUnitID.role = Actor.Roles.Missile;
+        }
+
+        TargetIdentity targetIdentity;
+        if (!TargetIdentityManager.identityDict.TryGetValue(missileUnitID.unitID, out targetIdentity))
+        {
+            targetIdentity = new TargetIdentity()
+            {
+                targetId = missileUnitID.unitID,
+                targetName = missileUnitID.targetName,
+                targetRole = Actor.Roles.Missile
+            };
+            TargetIdentityManager.identityDict.Add(missileUnitID.unitID, targetIdentity);
+        }
+        
+        if (TargetIdentityManager.GetIdentity(missileUnitID.unitID) == null)
+            Debug.LogError($"[CWB]: Failed to create identity for '{missileUnitID.unitID}'");
+        
+        if (!TargetIdentityManager.indexedIdentities.Contains(targetIdentity))
+            TargetIdentityManager.indexedIdentities.Add(targetIdentity);
+        
         missileComponent.bundleName = pack.name;
         VTResources.RegisterOverriddenResource(resourcePath, missile);
         VTNetworkManager.RegisterOverrideResource(resourcePath, missile);

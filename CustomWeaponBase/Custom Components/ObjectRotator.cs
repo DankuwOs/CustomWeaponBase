@@ -3,6 +3,7 @@
 
 public class ObjectRotator : MonoBehaviour
 {
+    [Header("Obsolete, use CWB_ObjectRotator instead.")]
     public Transform rotationTf;
 
     public Vector3 rotationAxis = new Vector3(0, 0, 1);
