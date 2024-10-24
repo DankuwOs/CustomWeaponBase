@@ -6,8 +6,6 @@ public class Patch_AircraftLiveryApplicator
 {
     public static void Postfix(AircraftLiveryApplicator __instance)
     {
-        // This makes sure that whenever a livery is applied to the aircraft any liverymesh equips currently on will have the livery applied.
-        
         WeaponManager wm = __instance.GetComponent<WeaponManager>();
 
         if (!wm)

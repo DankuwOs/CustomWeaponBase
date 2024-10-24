@@ -62,12 +62,18 @@ public class Main : VtolMod
     /// </summary>
     public static Dictionary<Tuple<string, GameObject, string>, object> weapons = new(); // realize now that tuples can have more than two im very smart
     
+    
 
     //public List<Tuple<string, CWBPack>> assetBundles;
 
     public List<CWBPack> cwbPacks = new();
+    
+    // Revert to these packs after leaving another mp lobby.
+    public List<CWBPack> myCWBPacks = new();
 
     public static bool allowWMDS = true;
+
+    public static bool wasInMP;
 
     public static Main instance;
 
@@ -76,7 +82,8 @@ public class Main : VtolMod
     public static int extraHps = 4;
 
     public string ModFolder;
-    
+
+    public List<SteamItem> AllItems => _allItems;
 
     private List<SteamItem> _allItems;
 
@@ -100,9 +107,18 @@ public class Main : VtolMod
         nodeObj.SetActive(false);
         DontDestroyOnLoad(nodeObj); // Fix game crashing after leaving and going back to the place
         
-        VTAPI.SceneLoaded += delegate
+        VTAPI.SceneLoaded += delegate (VTScenes scene)
         {
-            CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
+            if (scene == VTScenes.ReadyRoom)
+            {
+                if (wasInMP)
+                {
+                    MP_ReturnToMain();
+                }
+                
+                // Should fix a crash
+                CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
+            }
         };
 
         GetSteamItems();
@@ -115,7 +131,8 @@ public class Main : VtolMod
         else 
             _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
-
+    
+    
     public void ReloadPacks()
     {
         if (_loadPacksRoutine != null)
@@ -132,6 +149,8 @@ public class Main : VtolMod
         }
         
         GetSteamItems();
+
+        //GetCWBPacksRoutine();
         
         _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
@@ -145,7 +164,7 @@ public class Main : VtolMod
         {
             Debug.Log($"[CWB]: Found SteamItem {steamItem.Title}");
         }
-        items.AddRange(VTAPI.FindSteamItems());
+        items.AddRange(steamItems);
         var localItems = VTAPI.FindLocalItems();
         foreach (var localItem in localItems)
         {
@@ -171,6 +190,34 @@ public class Main : VtolMod
         }
         
         SaveSettings();
+    }
+    
+
+    private void MP_ReturnToMain()
+    {
+        if (myCWBPacks.Count == 0)
+            return;
+        
+        // Unload all packs that weren't originally loaded.
+        foreach (var loadedPack in cwbPacks)
+        {
+            if (!myCWBPacks.Any(p => p.name == loadedPack.name || p.item.PublishFieldId == loadedPack.item.PublishFieldId))
+            {
+                Debug.Log($"[CWB INFO]: Unloading not originally loaded pack '{loadedPack.name}'");
+                UnloadPack(loadedPack);
+            }
+        }
+        // Load originally loaded packs that aren't currently loaded.
+        foreach (var pack in myCWBPacks)
+        {
+            if (cwbPacks.All(loadedPack => pack.name != loadedPack.name))
+            {
+                Debug.Log($"[CWB INFO]: Loading originally loaded pack '{pack.name}'");
+                StartCoroutine(LoadPackRoutine(pack.item));
+            }
+        }
+        myCWBPacks.Clear();
+        wasInMP = false;
     }
 
     public void LoadPackForName(string title, bool useSetting = true)
@@ -224,7 +271,7 @@ public class Main : VtolMod
         }
     }
 
-    private IEnumerator LoadPackRoutine(FileInfo file, SteamItem item = null, bool useSetting = false)
+    public IEnumerator LoadPackRoutine(FileInfo file, SteamItem item = null, bool useSetting = false)
     {
         if (CWBSettings.packs == null)
         {
@@ -606,6 +653,10 @@ public class Main : VtolMod
         {
             packs = new List<CWBSettings.PackToLoad>(){}
         };
+        
+        // absolutely do not save another persons items, that'd be so cringe
+        if (wasInMP)
+            return;
         
         File.WriteAllText(Path.Combine(ModFolder, "loaditems.json"), JsonConvert.SerializeObject(CWBSettings, Formatting.Indented));
     }

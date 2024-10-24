@@ -198,12 +198,11 @@ public class CustomWeaponsBase : MonoBehaviour
         
         if (liveryMesh.copyMaterial)
         {
-            // I know you can transform.find an entire path now, :~(
-            var objectPaths = liveryMesh.materialPath.Split('/');
-
-            var obj = objectPaths.Aggregate(weaponManager.transform, (current, path) => current.Find(path));
+            var obj = weaponManager.transform.Find(liveryMesh.materialPath);
 
             var renderer = obj.GetComponent<Renderer>();
+            
+            Debug.Log($"[CWB_LiveryMesh]: Livery Tex = {renderer.material.GetTexture("_Livery")}");
 
             block = new MaterialPropertyBlock();
             renderer.GetPropertyBlock(block);

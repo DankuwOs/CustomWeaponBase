@@ -31,8 +31,6 @@ public class Patch_HPEquippable_Equip
             return;
         
         // Just incase
-        CustomWeaponsBase.ApplyLivery(__instance, __instance.weaponManager);
-        
         CustomWeaponsBase.ToggleMeshHider(__instance, __instance.weaponManager);
 
         var extension = __instance.GetComponent<CWB_HPEquipExtension>();
