@@ -51,6 +51,12 @@ public class CWBLobbyData
     {
         Debug.Log($"[CWB INFO]: Recieved pack data\nDATA:\n{data}");
         var packDataList = JsonConvert.DeserializeObject<List<PackData>>(data);
+
+        if (packDataList == null)
+        {
+            Debug.Log($"[CWB INFO]: Lobby has no pack data, returning empty list.");
+            return new List<PackData>();
+        }
         
         Debug.Log($"[CWB INFO]: Deserialized pack data");
         for (var index = 0; index < packDataList.Count; index++)
@@ -67,6 +73,7 @@ public class CWBLobbyData
         int selection = 0;
         ControllerEventHandler.UnpauseEvents();
         
+        Debug.Log($"[CWB INFO]: Showing MP pack sync confirmation");
         VTMPMainMenu.instance.confirmUI.DisplayConfirmation("Weapon Packs", "Joining this lobby may enable, disable, or download packs.", () => selection = 1, () => selection = 2);
 
         await UniTask.WaitUntil(() => selection != 0);
@@ -89,6 +96,8 @@ public class CWBLobbyData
             var item = steamItems.FirstOrDefault(p =>
                 p.Title == packData.itemTitle || p.PublishFieldId == packData.packId);
             
+            
+            
             // Try to get steam item from the workshop if it isnt already downloaded
             if (item == null)
             {
@@ -99,13 +108,14 @@ public class CWBLobbyData
                 }
                 
                 Debug.Log($"[CWB INFO]: Getting item '{packData.itemTitle}' 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}'");
-                var getItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(packData.packId);
-                if (getItem.Items.Count == 0)
+                var getPackItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(packData.packId);
+                if (getPackItem.Items.Count == 0)
                 {
                     Debug.Log($"[CWB ERROR]: Couldn't get item, check if 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}' is available.");
+                    continue;
                 }
 
-                item = getItem.Items[0];
+                item = getPackItem.Items[0];
             }
 
             if (item == null) continue;
@@ -114,6 +124,14 @@ public class CWBLobbyData
             {
                 Debug.Log($"[CWB INFO]: Downloading item '{packData.itemTitle}' 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}'");
                 await ModLoader.SteamQuery.SteamQueries.Instance.DownloadItem(item.PublishFieldId);
+                
+                var getItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(item.PublishFieldId);
+                if (getItem.Items.Count == 0)
+                {
+                    Debug.Log($"[CWB ERROR]: Couldn't get item 'https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' after downloading?");
+                }
+
+                item = getItem.Items[0];
             }
             
             if (TryGetCWBFiles(item, out var cwbFiles))
@@ -126,7 +144,8 @@ public class CWBLobbyData
             }
         }
 
-        foreach (var origPack in Main.instance.myCWBPacks.Where(origPack => packDataList.All(p => p.packName != origPack.name)))
+        var myPacks = Main.instance.myCWBPacks.ToArray();
+        foreach (var origPack in myPacks.Where(origPack => packDataList.All(p => p.packName != origPack.name)))
         {
             Main.instance.UnloadPack(origPack);
         }
@@ -139,6 +158,13 @@ public class CWBLobbyData
     private static bool TryGetCWBFiles(SteamItem item, out List<FileInfo> cwbFiles)
     {
         cwbFiles = new List<FileInfo>();
+        
+        if (item.Directory == null)
+        {
+            Debug.Log($"[CWB ERROR]: Couldn't get item directory for 'https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}', check if it exists.");
+            return false;
+        }
+        
         var files = Directory.GetFiles(item.Directory, "*.cwb");
         
         if (files.Length == 0)

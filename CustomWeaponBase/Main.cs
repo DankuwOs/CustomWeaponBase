@@ -208,7 +208,7 @@ public class Main : VtolMod
             }
         }
         // Load originally loaded packs that aren't currently loaded.
-        foreach (var pack in myCWBPacks)
+        foreach (var pack in myCWBPacks.ToArray())
         {
             if (cwbPacks.All(loadedPack => pack.name != loadedPack.name))
             {

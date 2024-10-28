@@ -98,6 +98,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Mods\Custom Weapons Base\CustomWeaponBase.dll&quot;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.10.1\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll&quot;&#xA;" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Mods\Custom Weapons Base\CustomWeaponBase.dll&quot;&#xA;&#xA;copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Mods\Custom Weapons Base\CustomWeaponBase.pdb&quot;&#xA;&#xA;copy &quot;$(TargetPath)&quot; &quot;D:\Programs n Friends\[000] Unity Projects\VTOL VR v1.10.1\Assets\_VTOL Modding Scripts\DLLS\CustomWeaponBase.dll&quot;&#xA;" />
   </Target>
 </Project>

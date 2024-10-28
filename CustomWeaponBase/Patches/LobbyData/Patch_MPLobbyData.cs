@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using CustomWeaponBase;
 using CustomWeaponBase.Patches.LobbyData;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
+using Steamworks.Data;
+using UnityEngine;
 using VTOLVR.Multiplayer;
 
 
@@ -49,7 +49,7 @@ public class CWB_VTMPMainMenu_LobbyData
 
     [HarmonyPatch(nameof(VTMPMainMenu.JoinLobbyRoutine))]
     [HarmonyPostfix]
-    public static void Patch_JoinLobbyRoutine(ref IEnumerator __result)
+    public static void Patch_JoinLobbyRoutine(ref IEnumerator __result, Lobby l)
     {
         var original = __result;
         
@@ -58,15 +58,19 @@ public class CWB_VTMPMainMenu_LobbyData
             Main.wasInMP = true;
             Main.instance.myCWBPacks = Main.instance.cwbPacks;
             
-            var serializedPackData = VTOLMPLobbyManager.currentLobby.GetData("CWB_Packs");
+            var serializedPackData = l.GetData("CWB_Packs");
             var packData = CWBLobbyData.DeserializePackData(serializedPackData);
+            
             bool join = false;
             yield return CWBLobbyData.LoadPacksForLobby(packData).ToCoroutine(b => join = b);
-            if (join == true)
+            if (join)
+            {
+                Debug.Log($"[CWB INFO]: Accepted MP pack sync, joining lobby...");
                 yield return original;
+            }
             else
             {
-                VTOLMPLobbyManager.LeaveLobby();
+                Debug.Log($"[CWB INFO]: Cancelled MP pack sync.");
                 ControllerEventHandler.UnpauseEvents();
             }
         }
