@@ -107,19 +107,9 @@ public class Main : VtolMod
         nodeObj.SetActive(false);
         DontDestroyOnLoad(nodeObj); // Fix game crashing after leaving and going back to the place
         
-        VTAPI.SceneLoaded += delegate (VTScenes scene)
-        {
-            if (scene == VTScenes.ReadyRoom)
-            {
-                if (wasInMP)
-                {
-                    MP_ReturnToMain();
-                }
-                
-                // Should fix a crash
-                CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
-            }
-        };
+        VTAPI.RegisterVariable("Danku-CWB", new VTModVariable("CheckVehicleListChanged", CheckVehicleListChanged));
+        
+        VTAPI.SceneLoaded += SceneLoaded;
 
         GetSteamItems();
 
@@ -131,8 +121,46 @@ public class Main : VtolMod
         else 
             _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
-    
-    
+
+    private void SceneLoaded(VTScenes scene)
+    {
+        if (scene != VTScenes.ReadyRoom) return;
+        
+        if (wasInMP)
+        {
+            MP_ReturnToMain();
+        }
+
+        // Should fix a crash
+        CheckVehicleListChanged();
+    }
+
+    public override void UnLoad()
+    {
+        SaveSettings();
+        
+        if (cwbPacks != null)
+        {
+            foreach (var cwbPack in cwbPacks.ToArray())
+            {
+                UnloadPack(cwbPack);
+            }
+        }
+
+        if (nodeObj)
+            Destroy(nodeObj);
+        
+        VTAPI.UnregisterMod("Danku-CWB");
+        
+        VTAPI.SceneLoaded -= SceneLoaded;
+        
+        if (CustomWeaponsBase.instance.gameObject)
+            Destroy(CustomWeaponsBase.instance.gameObject);
+        
+    }
+
+    private void CheckVehicleListChanged() => CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
+
     public void ReloadPacks()
     {
         if (_loadPacksRoutine != null)
@@ -149,8 +177,6 @@ public class Main : VtolMod
         }
         
         GetSteamItems();
-
-        //GetCWBPacksRoutine();
         
         _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
@@ -597,26 +623,6 @@ public class Main : VtolMod
         {
             UnloadPack(cwbPack, true);
         }
-    }
-
-    public override void UnLoad()
-    {
-        SaveSettings();
-        
-        if (cwbPacks != null)
-        {
-            foreach (var cwbPack in cwbPacks.ToArray())
-            {
-                UnloadPack(cwbPack);
-            }
-        }
-
-        if (nodeObj)
-            Destroy(nodeObj);
-        
-        if (CustomWeaponsBase.instance.gameObject)
-            Destroy(CustomWeaponsBase.instance.gameObject);
-        
     }
 
     public void GetSettings()

@@ -148,8 +148,6 @@ public class CustomWeaponsBase : MonoBehaviour
         
         Main.instance.ReloadPacks();
         //Main.instance.ReloadBundles();
-        if (MyWeaponManager)
-            ReloadWeapons();
     }
 
     public static bool CompareCompatNew(object compat, string vehicle, HPEquippable equippable)

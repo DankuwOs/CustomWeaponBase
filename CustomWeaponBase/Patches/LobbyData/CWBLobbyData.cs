@@ -6,7 +6,9 @@ using System.Linq;
 using CheeseMods.VTOLTaskProgressUI;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
+using ModLoader.Classes;
 using SteamQueries.Models;
+using Steamworks;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Valve.Newtonsoft.Json;
@@ -75,6 +77,7 @@ public class CWBLobbyData
         
         Debug.Log($"[CWB INFO]: Showing MP pack sync confirmation");
         VTMPMainMenu.instance.confirmUI.DisplayConfirmation("Weapon Packs", "Joining this lobby may enable, disable, or download packs.", () => selection = 1, () => selection = 2);
+        
 
         await UniTask.WaitUntil(() => selection != 0);
 
@@ -82,6 +85,7 @@ public class CWBLobbyData
             return false;
         
         VTMPMainMenu.instance.ShowError("Loading packs for lobby, you will join once it's done.");
+        
         var steamItems = Main.instance.AllItems;
 
         var syncTask = VTOLTaskProgressManager.RegisterTask(Main.instance, "Syncing Packs With Lobby");
@@ -103,22 +107,24 @@ public class CWBLobbyData
             {
                 if (packData.packId <= 0)
                 {
-                    Debug.Log($"[CWB WARN]: PublishFieldId is not set for '{packData.itemTitle}', the host is likely using a locally installed pack");
+                    Debug.Log($"[CWB WARN]: PublishFieldId is not set for '{packData.itemTitle}', the host is likely using a locally installed pack.");
                     continue;
                 }
                 
                 Debug.Log($"[CWB INFO]: Getting item '{packData.itemTitle}' 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}'");
                 var getPackItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(packData.packId);
-                if (getPackItem.Items.Count == 0)
+                if (getPackItem?.Items == null || getPackItem.Items.Count == 0)
                 {
                     Debug.Log($"[CWB ERROR]: Couldn't get item, check if 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}' is available.");
-                    continue;
+                    VTMPMainMenu.instance.ShowError($"Couldn't get workshop item for '{packData.itemTitle} : {packData.packId}'");
+                    return false;
                 }
 
                 item = getPackItem.Items[0];
             }
 
-            if (item == null) continue;
+            if (item == null) 
+                continue;
             
             if (!item.IsInstalled)
             {
@@ -126,27 +132,39 @@ public class CWBLobbyData
                 await ModLoader.SteamQuery.SteamQueries.Instance.DownloadItem(item.PublishFieldId);
                 
                 var getItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(item.PublishFieldId);
-                if (getItem.Items.Count == 0)
+                if (getItem?.Items == null || getItem.Items.Count == 0)
                 {
-                    Debug.Log($"[CWB ERROR]: Couldn't get item 'https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' after downloading?");
+                    Debug.Log($"[CWB ERROR]: Couldn't get item 'https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' after downloading.");
+                    VTMPMainMenu.instance.ShowError($"Couldn't get workshop item for '{item.Title} : {item.PublishFieldId}' after downloading.");
+                    return false;
                 }
 
                 item = getItem.Items[0];
             }
-            
-            if (TryGetCWBFiles(item, out var cwbFiles))
+
+            if (!TryGetCWBFiles(item, out var cwbFiles))
             {
-                foreach (var fileInfo in cwbFiles)
-                {
-                    if (packData.packName == fileInfo.Name)
-                        await Main.instance.LoadPackRoutine(fileInfo, item);
-                }
+                Debug.Log($"[CWB WARN]: Item '{item.Title} : https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' despite being in the pack list?");
+                continue;
+            }
+            
+            foreach (var fileInfo in cwbFiles)
+            {
+                if (packData.packName == fileInfo.Name)
+                    await Main.instance.LoadPackRoutine(fileInfo, item);
             }
         }
 
+        Debug.Log($"[CWB INFO]: Checking if any packs need to be unloaded...");
         var myPacks = Main.instance.myCWBPacks.ToArray();
-        foreach (var origPack in myPacks.Where(origPack => packDataList.All(p => p.packName != origPack.name)))
+        foreach (var origPack in myPacks)
         {
+            if (packDataList.Any(pData => pData.packName == origPack.name))
+            {
+                Debug.Log($"[CWB INFO]: Pack data list contains '{origPack.name}', will not unload.");
+                continue;
+            }
+            Debug.Log($"[CWB WARN]: Pack data list doesn't contain '{origPack.name}', unloading pack.");
             Main.instance.UnloadPack(origPack);
         }
         
