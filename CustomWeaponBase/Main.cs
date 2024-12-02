@@ -168,9 +168,6 @@ public class Main : VtolMod
             StopCoroutine(_loadPacksRoutine);
         }
         
-        weapons?.Clear();
-        
-        
         foreach (var cwbPack in cwbPacks.ToArray())
         {
             UnloadPack(cwbPack);
@@ -510,6 +507,8 @@ public class Main : VtolMod
     public void RegisterMissile(GameObject missile, string resourcePath, CWBPack pack)
     {
         var missileComponent = missile.AddComponent<CWB_Weapon>();
+
+        
         
         // TargetIdentityManager spits out shit if theres not an identity for a missile.
         var missileUnitID = missile.GetComponent<UnitIDIdentifier>();
@@ -520,24 +519,12 @@ public class Main : VtolMod
             missileUnitID.unitID = missile.name;
             missileUnitID.role = Actor.Roles.Missile;
         }
-
-        TargetIdentity targetIdentity;
-        if (!TargetIdentityManager.identityDict.TryGetValue(missileUnitID.unitID, out targetIdentity))
-        {
-            targetIdentity = new TargetIdentity()
-            {
-                targetId = missileUnitID.unitID,
-                targetName = missileUnitID.targetName,
-                targetRole = Actor.Roles.Missile
-            };
-            TargetIdentityManager.identityDict.Add(missileUnitID.unitID, targetIdentity);
-        }
         
-        if (TargetIdentityManager.GetIdentity(missileUnitID.unitID) == null)
-            Debug.LogError($"[CWB]: Failed to create identity for '{missileUnitID.unitID}'");
+        TargetIdentityManager.RegisterNonSpawnIdentity($"{pack.name}.{missile.name}", missileUnitID.unitID,
+            missileUnitID.role);
         
-        if (!TargetIdentityManager.indexedIdentities.Contains(targetIdentity))
-            TargetIdentityManager.indexedIdentities.Add(targetIdentity);
+        if (TargetIdentityManager.GetIdentity($"{pack.name}.{missile.name}") == null)
+            Debug.LogError($"[CWB Error]: Failed to create identity for '{pack.name} - {missile.name}'");
         
         missileComponent.bundleName = pack.name;
         VTResources.RegisterOverriddenResource(resourcePath, missile);
@@ -586,8 +573,12 @@ public class Main : VtolMod
                 VTNetworkManager.overriddenResources.Remove(equip.missileResourcePath);
             }
         }
+
         if (pack.item != null && VTAPI.IsItemLoaded(pack.item.Directory) && !fromDll)
+        {
+            Debug.Log($"[CWB]: '{pack.name}' unloading item");
             VTAPI.DisableSteamItem(pack.item); // Unload possible dll.
+        }
 
         var weaponsToRemove = weapons.Where(weaponPack => weaponPack.Key.Item3 == pack.name);
 

@@ -177,8 +177,10 @@ public class CustomWeaponsBase : MonoBehaviour
     {
         PlayerVehicles ??= VTResources.GetPlayerVehicleList();
 
+        Debug.Log($"[CWB]: CheckVehicleListChanged {newList.Count} > {PlayerVehicles.Count} ? {newList.Count > PlayerVehicles.Count}");
         if (newList.Count > PlayerVehicles.Count)
         {
+            PlayerVehicles = newList;
             RefreshAllWeapons();
         }
     }
