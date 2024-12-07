@@ -516,7 +516,7 @@ public class Main : VtolMod
         {
             missileUnitID = missile.AddComponent<UnitIDIdentifier>();
             missileUnitID.targetName = missile.name;
-            missileUnitID.unitID = missile.name;
+            missileUnitID.unitID = $"{pack.name}.{missile.name}";
             missileUnitID.role = Actor.Roles.Missile;
         }
         
