@@ -70,8 +70,18 @@ public class Patch_LoadoutConfigurator
 
         __instance.unlockedWeaponPrefabs = unlockedWeaponPrefabs;
         __instance.allWeaponPrefabs = unlockedWeaponPrefabs;
-        /*traverse.Field("unlockedWeaponPrefabs").SetValue(unlockedWeaponPrefabs);
-        traverse.Field("allWeaponPrefabs").SetValue(unlockedWeaponPrefabs);*/
+        if (__instance.recommendedEquipShortnames != null)
+        {
+            var recommendedEquipShortnames = __instance.recommendedEquipShortnames;
+            
+            // certainly a smaller or better way to do this but i do not care!
+            __instance.recommendedEquipShortnames = new string[__instance.hpNodes.Length];
+            for (int i = 0; i < recommendedEquipShortnames.Length; i++)
+            {
+                if (i < __instance.recommendedEquipShortnames.Length)
+                    __instance.recommendedEquipShortnames[i] = recommendedEquipShortnames[i];
+            }
+        }
     }
 
     [HarmonyPrefix]
