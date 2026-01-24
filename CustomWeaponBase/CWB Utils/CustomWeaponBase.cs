@@ -26,6 +26,8 @@ public class CustomWeaponsBase : MonoBehaviour
     {
         Debug.Log("[CWB]: Initialized.");
         instance = this;
+        
+        PlayerVehicles ??= VTResources.GetPlayerVehicleList();
     }
 
     public void AddObject(GameObject gameObject) => DetachedObjects.Add(gameObject);
@@ -146,7 +148,7 @@ public class CustomWeaponsBase : MonoBehaviour
             Debug.Log("why are the weapons null huh?!?");
         }
         
-        Main.instance.ReloadPacks();
+        StartCoroutine(Main.instance.ReloadPacks());
         //Main.instance.ReloadBundles();
     }
 

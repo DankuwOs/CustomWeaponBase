@@ -8,7 +8,7 @@ using VTOLVR.Multiplayer;
 [HarmonyPatch(typeof(Missile), nameof(Missile.Detonate), typeof(Collider))]
 public class Patch_Missile
 {
-    public static bool Prefix(Missile __instance, Collider directHit, Vector3 ___explosionNormal, ref bool ___detonated, UnityAction<Missile> ___OnMissileDetonated)
+    public static bool Prefix(Missile __instance, Collider directHit, UnityAction<Missile> ___OnMissileDetonated)
     {
         var cwbExp = __instance.GetComponent<CWB_Explosion>();
         
@@ -19,12 +19,12 @@ public class Patch_Missile
 
         // Written by hand so its legally mine.
 
-        if (___detonated)
+        if (__instance.detonated)
         {
             return true;
         }
 
-        ___detonated = true;
+        __instance.detonated = true;
 
         Vector3 sourceVelocity = Vector3.up;
         if (__instance.rb)
@@ -83,7 +83,7 @@ public class Patch_Missile
         {
             var scale = __instance.transform.localScale.x + __instance.transform.localScale.y + __instance.transform.localScale.z / 3;
             
-            cwbExp.CreateExplosionEffect(explosion, __instance.transform.position, cwbExp.useHitNormal? ___explosionNormal : sourceVelocity, scale);
+            cwbExp.CreateExplosionEffect(explosion, __instance.transform.position, cwbExp.useHitNormal? __instance.explosionNormal : sourceVelocity, scale);
         }
 
         if (__instance.isLocal)

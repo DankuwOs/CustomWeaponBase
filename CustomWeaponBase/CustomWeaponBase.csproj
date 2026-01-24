@@ -26,7 +26,7 @@
     <Reference Update="System.Runtime.Serialization">
       <HintPath>..\..\..\..\..\VTOLVR_Data\Managed\System.Runtime.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="SteamQueries.Models">
+    <Reference Include="SteamQueries.Models" Publicize="True">
       <HintPath>..\..\..\..\..\@Mod Loader\Managed\SteamQueries.Models.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InputSystem">
@@ -82,8 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Danku.BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />

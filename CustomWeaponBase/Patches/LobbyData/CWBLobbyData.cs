@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CheeseMods.VTOLTaskProgressUI;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
@@ -117,6 +118,7 @@ public class CWBLobbyData
                 {
                     Debug.Log($"[CWB ERROR]: Couldn't get item, check if 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}' is available.");
                     VTMPMainMenu.instance.ShowError($"Couldn't get workshop item for '{packData.itemTitle} : {packData.packId}'");
+                    syncTask.FinishTask("Failed!");
                     return false;
                 }
 
@@ -129,13 +131,35 @@ public class CWBLobbyData
             if (!item.IsInstalled)
             {
                 Debug.Log($"[CWB INFO]: Downloading item '{packData.itemTitle}' 'https://steamcommunity.com/sharedfiles/filedetails/?id={packData.packId}'");
-                await ModLoader.SteamQuery.SteamQueries.Instance.DownloadItem(item.PublishFieldId);
                 
+                var steamItem = await SteamUGC.QueryFileAsync(packData.packId);
+                if (steamItem == null)
+                {
+                    VTMPMainMenu.instance.ShowError("Couldn't query workshop item.");
+                    syncTask.FinishTask("Failed!");
+                    return false;
+                }
+                else
+                {
+                    if (!steamItem.Value.IsPublic)
+                    {
+                        Debug.Log($"[CWB ERROR]: Couldn't get item, not public!");
+                        VTMPMainMenu.instance.ShowError($"Lobby contains hidden items, cannot join.");
+                        syncTask.FinishTask("Failed!");
+                        return false;
+                    }
+                }
+                
+                
+                await ModLoader.SteamQuery.SteamQueries.Instance.DownloadItem(item.PublishFieldId);
+                await Task.Delay(250);
                 var getItem = await ModLoader.SteamQuery.SteamQueries.Instance.GetItem(item.PublishFieldId);
                 if (getItem?.Items == null || getItem.Items.Count == 0)
                 {
                     Debug.Log($"[CWB ERROR]: Couldn't get item 'https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' after downloading.");
+                    
                     VTMPMainMenu.instance.ShowError($"Couldn't get workshop item for '{item.Title} : {item.PublishFieldId}' after downloading.");
+                    syncTask.FinishTask("Failed!");
                     return false;
                 }
 
@@ -147,12 +171,14 @@ public class CWBLobbyData
                 Debug.Log($"[CWB WARN]: Item '{item.Title} : https://steamcommunity.com/sharedfiles/filedetails/?id={item.PublishFieldId}' despite being in the pack list?");
                 continue;
             }
-            
+
+            List<UniTask> coroutines = new List<UniTask>();
             foreach (var fileInfo in cwbFiles)
             {
                 if (packData.packName == fileInfo.Name)
                     await Main.instance.LoadPackRoutine(fileInfo, item);
             }
+            await UniTask.WhenAll(coroutines);
         }
 
         Debug.Log($"[CWB INFO]: Checking if any packs need to be unloaded...");

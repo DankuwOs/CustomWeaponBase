@@ -7,10 +7,10 @@ using VTNetworking;
 [HarmonyPatch(typeof(VTNetworkManager), "GetInstantiatePrefab")]
 public class Patch_NetInstantiate
 {
-    public static bool Prefix(string resourcePath, ref Dictionary<string, GameObject> ___overriddenResources, ref GameObject __result)
+    public static bool Prefix(string resourcePath,  ref GameObject __result)
     {
         GameObject gameObject;
-        if (___overriddenResources.TryGetValue(resourcePath, out gameObject))
+        if (VTNetworkManager.overriddenResources.TryGetValue(resourcePath, out gameObject))
         {
             if (gameObject == null)
             {

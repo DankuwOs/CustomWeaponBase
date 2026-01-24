@@ -49,6 +49,8 @@ public class CWBPack
     public SteamItem item;
 
     public List<PackEquip> equips;
+
+    public bool finishedLoading = false;
 }
 
 
@@ -89,10 +91,13 @@ public class Main : VtolMod
 
     private static CWBSettings CWBSettings;
 
+    private bool _cancelingPackRoutine;
+    
     private Coroutine _loadPacksRoutine;
         
     public void Start()
     {
+        
         ModFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         
         GetSettings();
@@ -115,8 +120,7 @@ public class Main : VtolMod
 
         if (_loadPacksRoutine != null)
         {
-            StopCoroutine(_loadPacksRoutine);
-            ReloadPacks();
+            StartCoroutine(ReloadPacks());
         }
         else 
             _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
@@ -161,12 +165,29 @@ public class Main : VtolMod
 
     private void CheckVehicleListChanged() => CustomWeaponsBase.instance.CheckVehicleListChanged(VTResources.GetPlayerVehicleList());
 
-    public void ReloadPacks()
+    public IEnumerator ReloadPacks()
     {
+        var reloadPacksTask = VTOLTaskProgressManager.RegisterTask(this, "Reloading Packs (Vehicle List Changed)", "Custom Weapons Base",
+            TaskInfoFlags.ShowStatus);
         if (_loadPacksRoutine != null)
         {
-            StopCoroutine(_loadPacksRoutine);
+            reloadPacksTask.SetStatus("Waiting for all packs to start loading");
+            while (_loadPacksRoutine != null)
+            {
+                yield return null;
+            }
+            
         }
+        
+        bool finishedLoadingPacks = false;
+        while (!finishedLoadingPacks)
+        {
+            reloadPacksTask.SetStatus("Waiting for all packs to finish loading");
+            finishedLoadingPacks = cwbPacks.All(p => p.finishedLoading);
+            yield return null;
+        }
+        
+        reloadPacksTask.FinishTask();
         
         foreach (var cwbPack in cwbPacks.ToArray())
         {
@@ -174,6 +195,7 @@ public class Main : VtolMod
         }
         
         GetSteamItems();
+        
         
         _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
@@ -206,15 +228,15 @@ public class Main : VtolMod
             var files = Directory.GetFiles(steamItem.Directory, "*.cwb");
             if (files.Length == 0)
                 continue;
-            
+
             Debug.Log($"[CWB]: Loading CWB Files from '{steamItem.Directory}'");
-            
+
             yield return StartCoroutine(LoadPackRoutine(steamItem, !ignoreSetting));
         }
-        
-        SaveSettings();
+
+        _loadPacksRoutine = null;
     }
-    
+
 
     private void MP_ReturnToMain()
     {
@@ -294,7 +316,7 @@ public class Main : VtolMod
         }
     }
 
-    public IEnumerator LoadPackRoutine(FileInfo file, SteamItem item = null, bool useSetting = false)
+    public IEnumerator LoadPackRoutine(FileInfo file, SteamItem item = null, bool useSetting = false, bool waitForWeapons = false)
     {
         if (CWBSettings.packs == null)
         {
@@ -328,7 +350,10 @@ public class Main : VtolMod
         
         cwbPacks.Add(cwbPack);
         
-        StartCoroutine(LoadStreamedWeapons(file, cwbPack));
+        if (waitForWeapons)
+            yield return StartCoroutine(LoadStreamedWeapons(file, cwbPack));
+        else
+            StartCoroutine(LoadStreamedWeapons(file, cwbPack));
     }
 
     private IEnumerator LoadStreamedWeapons(FileInfo info, CWBPack pack)
@@ -418,7 +443,7 @@ public class Main : VtolMod
                     loadTask.SetProgress((float)idx++ / jsonWeapons.Count);
                 }
             }
-
+            pack.finishedLoading = true;
             assetBundle.Unload(false); // Unload the bundle so that you can overwrite the file.
             loadTask.FinishTask();
         }
@@ -470,7 +495,6 @@ public class Main : VtolMod
             if (launcher.ml.missilePrefab && VTResources.Load<GameObject>(launcher.missileResourcePath) == null)
             {
                 RegisterMissile(launcher.ml.missilePrefab, launcher.missileResourcePath, pack);
-                
                 thisEquip.missileResourcePath = launcher.missileResourcePath; // Add missile resource path to remove when unloading the pack.
             }
         }
