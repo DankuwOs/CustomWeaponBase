@@ -32,7 +32,6 @@ public class CWBSettings
     public bool WillLoadPack(string name)
     {
         var willLoad = packs.Any(p => p.name == name && p.loadThisPack) || packs.All(p => p.name != name);
-        //Debug.Log($"[CWB]: '{name}' will {(willLoad ? "" : "not")} be loaded");
         return willLoad;
     }
 }
@@ -95,7 +94,7 @@ public class Main : VtolMod
     
     private Coroutine _loadPacksRoutine;
         
-    public void Start()
+    public IEnumerator Start()
     {
         
         ModFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -116,7 +115,7 @@ public class Main : VtolMod
         
         VTAPI.SceneLoaded += SceneLoaded;
 
-        GetSteamItems();
+        yield return GetSteamItems().ToCoroutine();
 
         if (_loadPacksRoutine != null)
         {
@@ -194,17 +193,17 @@ public class Main : VtolMod
             UnloadPack(cwbPack);
         }
         
-        GetSteamItems();
+        yield return GetSteamItems().ToCoroutine();
         
         
         _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
 
 
-    private void GetSteamItems()
+    private async UniTask GetSteamItems()
     {
         List<SteamItem> items = new List<SteamItem>();
-        var steamItems = VTAPI.FindSteamItems();
+        var steamItems = await VTAPI.FindSteamItemsAsync();
         foreach (var steamItem in steamItems)
         {
             Debug.Log($"[CWB]: Found SteamItem {steamItem.Title}");
@@ -398,21 +397,12 @@ public class Main : VtolMod
                 if (Directory.Exists(devDependency))
                 {
                     Debug.Log($"[CWB]: Trying to load dev dependency @ {devDependency}");
-                    try
+                    var steamItem = _allItems.Find(item => Path.GetFullPath(item.Directory) == Path.GetFullPath(devDependency));
+                    if (steamItem != null)
                     {
-                        var steamItem = _allItems.Find(item => Path.GetFullPath(item.Directory) == Path.GetFullPath(devDependency));
-                        if (steamItem != null)
-                        {
-                            pack.item = steamItem;
-                            if (!VTAPI.IsItemLoaded(steamItem.Directory))
-                                VTAPI.LoadSteamItem(steamItem);
-                        }
-                        
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError($"[CWB]: Couldn't load dev dependency @ {devDependency}. {e}");
-                        throw;
+                        pack.item = steamItem;
+                        if (!VTAPI.IsItemLoaded(steamItem.Directory))
+                            yield return VTAPI.TryLoadSteamItem(steamItem).ToCoroutine();
                     }
                 }
                 else if (!string.IsNullOrEmpty(devDependency))
@@ -424,6 +414,7 @@ public class Main : VtolMod
             if (jsonWeapons != null)
             {
                 int idx = 0;
+                
                 loadTask.SetStatus($"Loading {jsonWeapons.Count} equips...");
                 foreach (var weapon in jsonWeapons)
                 {
@@ -434,18 +425,18 @@ public class Main : VtolMod
 
                     if (weaponAsset == null)
                     {
-                        Debug.Log(
-                            $"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
+                        Debug.Log($"[CWB]: Couldn't load asset {weapon.Key}, make sure the prefab is included in the AB and built.");
                         continue;
                     }
-                    
+
                     RegisterWeapon(weaponAsset, weapon.Key, weapon.Value, pack);
                     loadTask.SetProgress((float)idx++ / jsonWeapons.Count);
                 }
             }
-            pack.finishedLoading = true;
             assetBundle.Unload(false); // Unload the bundle so that you can overwrite the file.
             loadTask.FinishTask();
+            
+            pack.finishedLoading = true;
         }
         else
         {
