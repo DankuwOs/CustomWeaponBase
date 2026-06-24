@@ -195,7 +195,6 @@ public class Main : VtolMod
         
         yield return GetSteamItems().ToCoroutine();
         
-        
         _loadPacksRoutine = StartCoroutine(GetCWBPacksRoutine());
     }
 
@@ -293,12 +292,10 @@ public class Main : VtolMod
             {
                 if (!string.IsNullOrWhiteSpace(item.MetaData.DllName))
                 {
-                    var uniTask = VTAPI.TryLoadSteamItem(item);
-                    yield return uniTask.ToCoroutine();
-                    if (!uniTask.GetAwaiter().GetResult())
-                    {
-                        Debug.LogError($"[CWB]: Something failed when loading '{item.Title}'");
-                    }
+                    bool result = true;
+                    yield return VTAPI.TryLoadSteamItem(item).ToCoroutine(r => result = r);
+                    if (!result)
+                        Debug.Log($"[CWB_ERROR]: Error when loading Steam Item '{item.Title}'");
                 }
             }
         }
