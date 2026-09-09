@@ -532,7 +532,7 @@ public class Main : VtolMod
             missileUnitID.role = Actor.Roles.Missile;
         }
         
-        TargetIdentityManager.RegisterNonSpawnIdentity($"{pack.name}.{missile.name}", missileUnitID.unitID,
+        TargetIdentityManager.RegisterNonSpawnIdentity($"{pack.name}.{missile.name}", missileUnitID.targetName,
             missileUnitID.role);
         
         if (TargetIdentityManager.GetIdentity($"{pack.name}.{missile.name}") == null)
