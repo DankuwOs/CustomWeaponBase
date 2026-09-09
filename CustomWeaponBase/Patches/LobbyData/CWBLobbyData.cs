@@ -172,13 +172,13 @@ public class CWBLobbyData
                 continue;
             }
 
-            List<UniTask> coroutines = new List<UniTask>();
+            List<UniTask> uniTasks = new List<UniTask>();
             foreach (var fileInfo in cwbFiles)
             {
                 if (packData.packName == fileInfo.Name)
-                    await Main.instance.LoadPackRoutine(fileInfo, item);
+                    uniTasks.Add(Main.instance.LoadPackRoutine(fileInfo, item, waitForWeapons: true).ToUniTask());
             }
-            await UniTask.WhenAll(coroutines);
+            await UniTask.WhenAll(uniTasks);
         }
 
         Debug.Log($"[CWB INFO]: Checking if any packs need to be unloaded...");

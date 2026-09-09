@@ -504,7 +504,6 @@ public class Main : VtolMod
             VTNetworkManager.RegisterOverrideResource($"{playerVehicle.equipsResourcePath}/{weaponName}", equip);
             
             resourcePaths.Add($"{playerVehicle.equipsResourcePath}/{weaponName}");
-            
         }
 
         weapons.Add(Tuple.Create(weaponName, equip, pack.name), compatability);
