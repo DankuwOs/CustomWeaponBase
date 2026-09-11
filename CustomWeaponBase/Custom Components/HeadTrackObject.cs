@@ -10,6 +10,12 @@ public class HeadTrackObject : MonoBehaviour
     private void LateUpdate()
     {
         if (equip.itemActivated)
-            turret.AimToTarget(VRHead.instance.transform.position + VRHead.instance.transform.forward * 2000f, true, true, false);
+        {
+            if (!VRHead.instance)
+                return;
+            
+            turret.AimToTarget(VRHead.instance.transform.position + VRHead.instance.transform.forward * 2000f, true,
+                true, false);
+        }
     }
 }
